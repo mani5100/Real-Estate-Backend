@@ -28,4 +28,8 @@ class CustomerResponse(CustomerBase):
 
     model_config = ConfigDict(from_attributes=True)
     
-    
+
+class CustomerPaginatedResponse(BaseModel):
+    total: int
+    next_cursor: int | None
+    results: list[CustomerResponse]

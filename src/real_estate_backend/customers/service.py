@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, func
 from fastapi import HTTPException
 
 from real_estate_backend.customers.model import Customer
@@ -13,6 +13,8 @@ def get_all_customers(
     phone: str | None,
     email: str | None,
     full_name: str | None,
+    cursor: int | None,
+    limit: int,
     
 ):
     stmt = select(Customer)
@@ -28,7 +30,18 @@ def get_all_customers(
     if full_name:
         stmt = stmt.where(Customer.full_name.ilike(f"%{full_name}%"))
 
-    return db.scalars(stmt).all()
+    total = db.scalar(select(func.count()).select_from(stmt.subquery()))
+    
+    if cursor:
+        stmt = stmt.where(Customer.id > cursor)
+
+    stmt = stmt.order_by(Customer.id).limit(limit)
+
+    customers = db.scalars(stmt).all()
+
+    next_cursor = customers[-1].id if len(customers) == limit else None
+
+    return {"total": total, "next_cursor": next_cursor, "results": customers}
 
 
 def get_customer_by_id(db: Session, customer_id: int) -> Customer:
