@@ -1,0 +1,26 @@
+[project]
+name = "real-estate-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Abdul Rehman", email = "m.abdulrehman.shoukat@gmial.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.18.5",
+    "dotenv>=0.9.9",
+    "email-validator>=2.3.0",
+    "fastapi>=0.139.0",
+    "psycopg2>=2.9.12",
+    "pydantic-settings>=2.14.2",
+    "sqlalchemy>=2.0.51",
+    "uvicorn>=0.51.0",
+]
+
+[project.scripts]
+real-estate-backend = "real_estate_backend:main"
+
+[build-system]
+requires = ["uv_build>=0.10.11,<0.11.0"]
+build-backend = "uv_build"
