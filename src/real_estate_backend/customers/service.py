@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
-from fastapi import HTTPException
-
+from real_estate_backend.core.exceptions import CustomerHasLeadsError, CustomerNotFoundError, EmailAlreadyExistsError
 from real_estate_backend.customers.model import Customer
 from real_estate_backend.customers.schema import CustomerCreate, CustomerUpdate
 
@@ -47,14 +46,14 @@ def get_all_customers(
 def get_customer_by_id(db: Session, customer_id: int) -> Customer:
     customer = db.get(Customer, customer_id)
     if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
+        raise CustomerNotFoundError(customer_id)
     return customer
 
 
 def create_customer(db: Session, data: CustomerCreate) -> Customer:
     existing = db.scalar(select(Customer).where(Customer.email == data.email))
     if existing:
-        raise HTTPException(status_code=409, detail="Email already registered")
+        raise EmailAlreadyExistsError(data.email)
 
     customer = Customer(**data.model_dump())
     db.add(customer)
@@ -78,10 +77,7 @@ def delete_customer(db: Session, customer_id: int) -> None:
     customer = get_customer_by_id(db, customer_id)
 
     if customer.leads:
-        raise HTTPException(
-            status_code=409,
-            detail="Cannot delete customer with existing leads"
-        )
+        raise CustomerHasLeadsError(customer_id)
 
     db.delete(customer)
     db.commit()

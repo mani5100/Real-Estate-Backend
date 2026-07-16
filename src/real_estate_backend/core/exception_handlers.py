@@ -1,0 +1,52 @@
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from real_estate_backend.core.exceptions import (
+    NotFoundError,
+    ConflictError,
+    PermissionDeniedError,
+    AppException,
+)
+
+
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for error in exc.errors():
+        location = " → ".join(str(loc) for loc in error["loc"] if loc != "body")
+        errors.append({
+            "field": location,
+            "message": error["msg"],
+            "invalid_value": error.get("input"),
+        })
+    return JSONResponse(
+        status_code=422,
+        content={"detail": errors}
+    )
+  
+async def not_found_handler(request: Request, exc: NotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={"error": "Not Found", "message": exc.message}
+    )
+
+
+async def conflict_handler(request: Request, exc: ConflictError):
+    return JSONResponse(
+        status_code=409,
+        content={"error": "Conflict", "message": exc.message}
+    )
+
+
+async def permission_denied_handler(request: Request, exc: PermissionDeniedError):
+    return JSONResponse(
+        status_code=403,
+        content={"error": "Permission Denied", "message": exc.message}
+    )
+
+
+async def app_exception_handler(request: Request, exc: AppException):
+    # Fallback for any unhandled AppException
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal Error", "message": exc.message}
+    )

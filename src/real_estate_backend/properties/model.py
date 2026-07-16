@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import Boolean, DateTime, Float, Integer, String, func
+from sqlalchemy import Boolean, DateTime, Float, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ class Property(Base):
     bedrooms:Mapped[int]=mapped_column(Integer,default=1)
     bathrooms:Mapped[int]=mapped_column(Integer,default=1)
     area_sqft:Mapped[float]=mapped_column(Float,nullable=True)
-    description:Mapped[int]=mapped_column(Integer,nullable=True)
+    description:Mapped[str]=mapped_column(Text,nullable=True)
     is_available:Mapped[bool]=mapped_column(Boolean,default=True)
     created_at:Mapped[DateTime]=mapped_column(DateTime,server_default=func.now())
     updated_at:Mapped[DateTime]=mapped_column(DateTime,server_default=func.now(),onupdate=func.now())

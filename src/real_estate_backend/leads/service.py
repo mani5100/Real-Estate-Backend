@@ -1,9 +1,14 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, func
-from fastapi import HTTPException
-
+from real_estate_backend.core.exceptions import (
+    LeadNotFoundError,
+    CustomerNotFoundError,
+    PropertyNotFoundError,
+)
 from real_estate_backend.leads.model import Lead, LeadStatus
 from real_estate_backend.leads.schema import LeadCreate, LeadUpdate
+from real_estate_backend.customers.model import Customer
+from real_estate_backend.properties.model import Property
 
 
 def get_all_leads(
@@ -59,11 +64,19 @@ def get_lead_by_id(db: Session, lead_id: int) -> Lead:
     )
     lead = db.scalar(stmt)
     if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
+        raise LeadNotFoundError(lead_id)
     return lead
 
 
 def create_lead(db: Session, data: LeadCreate) -> Lead:
+    
+    customer = db.get(Customer, data.customer_id)
+    if not customer:
+        raise CustomerNotFoundError(data.customer_id)
+
+    property = db.get(Property, data.property_id)
+    if not property:
+        raise PropertyNotFoundError(data.property_id)
     lead = Lead(**data.model_dump())
     db.add(lead)
     db.commit()
@@ -74,7 +87,7 @@ def create_lead(db: Session, data: LeadCreate) -> Lead:
 def update_lead(db: Session, lead_id: int, data: LeadUpdate) -> Lead:
     lead = db.get(Lead, lead_id)
     if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
+        raise LeadNotFoundError(lead_id)
 
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(lead, field, value)
@@ -87,7 +100,7 @@ def update_lead(db: Session, lead_id: int, data: LeadUpdate) -> Lead:
 def delete_lead(db: Session, lead_id: int) -> None:
     lead = db.get(Lead, lead_id)
     if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
+        raise LeadNotFoundError(lead_id)
 
     db.delete(lead)
     db.commit()

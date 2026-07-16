@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select,func
-from fastapi import HTTPException
-
+from real_estate_backend.core.exceptions import (
+    PropertyNotFoundError,
+    PropertyHasLeadsError,
+    NoPropertiesFoundError
+)
 from real_estate_backend.properties.model import Property
 from real_estate_backend.properties.schema import PropertyCreate, PropertyUpdate
 
@@ -48,7 +51,7 @@ def get_all_properties(
 def get_property_by_id(db: Session, property_id: int) -> Property:
     prop = db.get(Property, property_id)
     if not prop:
-        raise HTTPException(status_code=404, detail="Property not found")
+        raise PropertyNotFoundError(property_id)
     return prop
 
 
@@ -75,10 +78,7 @@ def delete_property(db: Session, property_id: int) -> None:
     prop = get_property_by_id(db, property_id)
 
     if prop.leads:
-        raise HTTPException(
-            status_code=409,
-            detail="Cannot delete property with existing leads"
-        )
+         raise PropertyHasLeadsError(property_id)
 
     db.delete(prop)
     db.commit()
@@ -88,5 +88,5 @@ def get_properties_by_bedrooms(db: Session, bedrooms: int) -> list[Property]:
     stmt = select(Property).where(Property.bedrooms == bedrooms)
     properties = db.scalars(stmt).all()
     if not properties:
-        raise HTTPException(status_code=404, detail=f"No properties found with {bedrooms} bedrooms")
+        raise NoPropertiesFoundError(bedrooms)
     return properties
