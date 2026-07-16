@@ -7,8 +7,9 @@ from real_estate_backend.core.exceptions import (
 )
 from real_estate_backend.properties.model import Property
 from real_estate_backend.properties.schema import PropertyCreate, PropertyUpdate
+from real_estate_backend.core.logging import log_call
 
-
+@log_call
 def get_all_properties(
     db: Session,
     city: str | None,
@@ -47,14 +48,14 @@ def get_all_properties(
         "results": properties,
     }
 
-
+@log_call
 def get_property_by_id(db: Session, property_id: int) -> Property:
     prop = db.get(Property, property_id)
     if not prop:
         raise PropertyNotFoundError(property_id)
     return prop
 
-
+@log_call
 def create_property(db: Session, data: PropertyCreate) -> Property:
     prop = Property(**data.model_dump())
     db.add(prop)
@@ -62,7 +63,7 @@ def create_property(db: Session, data: PropertyCreate) -> Property:
     db.refresh(prop)
     return prop
 
-
+@log_call
 def update_property(db: Session, property_id: int, data: PropertyUpdate) -> Property:
     prop = get_property_by_id(db, property_id)
 
@@ -73,7 +74,7 @@ def update_property(db: Session, property_id: int, data: PropertyUpdate) -> Prop
     db.refresh(prop)
     return prop
 
-
+@log_call
 def delete_property(db: Session, property_id: int) -> None:
     prop = get_property_by_id(db, property_id)
 
@@ -83,7 +84,7 @@ def delete_property(db: Session, property_id: int) -> None:
     db.delete(prop)
     db.commit()
     
-    
+@log_call   
 def get_properties_by_bedrooms(db: Session, bedrooms: int) -> list[Property]:
     stmt = select(Property).where(Property.bedrooms == bedrooms)
     properties = db.scalars(stmt).all()

@@ -9,8 +9,9 @@ from real_estate_backend.leads.model import Lead, LeadStatus
 from real_estate_backend.leads.schema import LeadCreate, LeadUpdate
 from real_estate_backend.customers.model import Customer
 from real_estate_backend.properties.model import Property
+from real_estate_backend.core.logging import log_call
 
-
+@log_call
 def get_all_leads(
     db: Session,
     status: LeadStatus | None,
@@ -52,7 +53,7 @@ def get_all_leads(
         "results": leads,
     }
 
-
+@log_call
 def get_lead_by_id(db: Session, lead_id: int) -> Lead:
     stmt = (
         select(Lead)
@@ -67,7 +68,7 @@ def get_lead_by_id(db: Session, lead_id: int) -> Lead:
         raise LeadNotFoundError(lead_id)
     return lead
 
-
+@log_call
 def create_lead(db: Session, data: LeadCreate) -> Lead:
     
     customer = db.get(Customer, data.customer_id)
@@ -83,7 +84,7 @@ def create_lead(db: Session, data: LeadCreate) -> Lead:
     db.refresh(lead)
     return lead
 
-
+@log_call
 def update_lead(db: Session, lead_id: int, data: LeadUpdate) -> Lead:
     lead = db.get(Lead, lead_id)
     if not lead:
@@ -96,7 +97,7 @@ def update_lead(db: Session, lead_id: int, data: LeadUpdate) -> Lead:
     db.refresh(lead)
     return lead
 
-
+@log_call
 def delete_lead(db: Session, lead_id: int) -> None:
     lead = db.get(Lead, lead_id)
     if not lead:

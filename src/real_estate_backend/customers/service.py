@@ -3,8 +3,9 @@ from sqlalchemy import select, func
 from real_estate_backend.core.exceptions import CustomerHasLeadsError, CustomerNotFoundError, EmailAlreadyExistsError
 from real_estate_backend.customers.model import Customer
 from real_estate_backend.customers.schema import CustomerCreate, CustomerUpdate
+from real_estate_backend.core.logging import log_call
 
-
+@log_call
 def get_all_customers(
     db: Session,
     is_active: bool | None,
@@ -42,14 +43,14 @@ def get_all_customers(
 
     return {"total": total, "next_cursor": next_cursor, "results": customers}
 
-
+@log_call
 def get_customer_by_id(db: Session, customer_id: int) -> Customer:
     customer = db.get(Customer, customer_id)
     if not customer:
         raise CustomerNotFoundError(customer_id)
     return customer
 
-
+@log_call
 def create_customer(db: Session, data: CustomerCreate) -> Customer:
     existing = db.scalar(select(Customer).where(Customer.email == data.email))
     if existing:
@@ -61,7 +62,7 @@ def create_customer(db: Session, data: CustomerCreate) -> Customer:
     db.refresh(customer)
     return customer
 
-
+@log_call
 def update_customer(db: Session, customer_id: int, data: CustomerUpdate) -> Customer:
     customer = get_customer_by_id(db, customer_id)
 
@@ -72,7 +73,7 @@ def update_customer(db: Session, customer_id: int, data: CustomerUpdate) -> Cust
     db.refresh(customer)
     return customer
 
-
+@log_call
 def delete_customer(db: Session, customer_id: int) -> None:
     customer = get_customer_by_id(db, customer_id)
 
