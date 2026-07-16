@@ -40,4 +40,6 @@ class PropertyResponse(PropertyBase):
     
 class PropertyListResponse(BaseModel):
     total: int
+    next_cursor: int | None
     results: list[PropertyResponse]
+    

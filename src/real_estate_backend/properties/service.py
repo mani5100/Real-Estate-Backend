@@ -13,6 +13,8 @@ def get_all_properties(
     max_price: float | None,
     min_bedrooms: int | None,
     is_available: bool | None,
+    cursor: int | None,
+    limit: int
 ):
     stmt = select(Property)
 
@@ -28,9 +30,19 @@ def get_all_properties(
         stmt = stmt.where(Property.is_available == is_available)
 
     total = db.scalar(select(func.count()).select_from(stmt.subquery()))
+    if cursor is not None:
+        stmt = stmt.where(Property.id > cursor)
+        
+    stmt = stmt.order_by(Property.id).limit(limit)
     properties = db.scalars(stmt).all()
-
-    return {"total": total, "results": properties}
+    
+    next_cursor = properties[-1].id if len(properties) == limit else None
+    
+    return {
+        "total": total,
+        "next_cursor": next_cursor,
+        "results": properties,
+    }
 
 
 def get_property_by_id(db: Session, property_id: int) -> Property:

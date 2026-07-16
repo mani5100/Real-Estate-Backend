@@ -15,10 +15,15 @@ def list_properties(
     max_price: float | None = None,
     min_bedrooms: int | None = None,
     is_available: bool | None = None,
+    cursor: int | None = None,
+    limit: int = 3,
     db: Session = Depends(get_db),
 ):
-    return service.get_all_properties(db, city, min_price, max_price, min_bedrooms, is_available)
+    return service.get_all_properties(db, city, min_price, max_price, min_bedrooms, is_available,cursor,limit)
 
+@router.get("/bedrooms/{bedrooms}", response_model=list[PropertyResponse])
+def get_properties_by_bedrooms(bedrooms: int, db: Session = Depends(get_db)):
+    return service.get_properties_by_bedrooms(db, bedrooms)
 
 @router.get("/{property_id}", response_model=PropertyResponse)
 def get_property(property_id: int, db: Session = Depends(get_db)):
@@ -38,7 +43,3 @@ def update_property(property_id: int, data: PropertyUpdate, db: Session = Depend
 @router.delete("/{property_id}", status_code=204)
 def delete_property(property_id: int, db: Session = Depends(get_db)):
     service.delete_property(db, property_id)
-    
-@router.get("/bedrooms/{bedrooms}", response_model=list[PropertyResponse])
-def get_properties_by_bedrooms(bedrooms: int, db: Session = Depends(get_db)):
-    return service.get_properties_by_bedrooms(db, bedrooms)
