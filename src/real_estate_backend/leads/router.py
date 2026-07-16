@@ -3,22 +3,24 @@ from sqlalchemy.orm import Session
 
 from real_estate_backend.core.database import get_db
 from real_estate_backend.leads.model import LeadStatus
-from real_estate_backend.leads.schema import LeadCreate, LeadUpdate, LeadResponse, LeadDetailResponse
+from real_estate_backend.leads.schema import LeadCreate, LeadUpdate, LeadResponse, LeadDetailResponse, LeadPaginatedResponse
 from real_estate_backend.leads import service
 
 router = APIRouter(prefix="/leads", tags=["Leads"])
 
 
-@router.get("/", response_model=list[LeadResponse])
+@router.get("/", response_model=LeadPaginatedResponse)
 def list_leads(
     status: LeadStatus | None = None,
     agent_id: str | None = None,
     customer_id: int | None = None,
     property_id: int | None = None,
     search: str | None = None,
+    cursor: int | None = None,
+    limit: int = 3,
     db: Session = Depends(get_db),
 ):
-    return service.get_all_leads(db, status, agent_id, customer_id, property_id, search)
+    return service.get_all_leads(db, status, agent_id, customer_id, property_id, search, cursor, limit)
 
 
 @router.get("/{lead_id}", response_model=LeadDetailResponse)

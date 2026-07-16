@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import select
+from sqlalchemy import select, func
 from fastapi import HTTPException
 
 from real_estate_backend.leads.model import Lead, LeadStatus
@@ -13,6 +13,8 @@ def get_all_leads(
     customer_id: int | None,
     property_id: int | None,
     search: str | None,
+    cursor: int | None,
+    limit: int
 ):
     stmt = select(Lead)
 
@@ -27,7 +29,23 @@ def get_all_leads(
     if search:
         stmt = stmt.where(Lead.notes.ilike(f"%{search}%"))
 
-    return db.scalars(stmt).all()
+    total = db.scalar(
+    select(func.count()).select_from(stmt.subquery()))
+
+    if cursor is not None:
+        stmt = stmt.where(Lead.id > cursor)
+
+    stmt = stmt.order_by(Lead.id).limit(limit)
+
+    leads = db.scalars(stmt).all()
+
+    next_cursor = leads[-1].id if len(leads) == limit else None
+
+    return {
+        "total": total,
+        "next_cursor": next_cursor,
+        "results": leads,
+    }
 
 
 def get_lead_by_id(db: Session, lead_id: int) -> Lead:

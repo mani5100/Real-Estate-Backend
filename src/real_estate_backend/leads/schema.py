@@ -35,3 +35,8 @@ class LeadResponse(LeadBase):
 class LeadDetailResponse(LeadResponse):
     customer: CustomerResponse
     property: PropertyResponse
+    
+class LeadPaginatedResponse(BaseModel):
+    total: int
+    next_cursor: int | None
+    results: list[LeadResponse]
