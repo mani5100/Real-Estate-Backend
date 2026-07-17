@@ -59,3 +59,23 @@ class PermissionDeniedError(AppException):
 class NoPropertiesFoundError(NotFoundError):
     def __init__(self, bedrooms: int):
         super().__init__(f"No properties found with {bedrooms} bedrooms")
+        
+# ── User Exceptions ────────────────────────────────   
+class UserNotFoundError(NotFoundError):
+    def __init__(self, user_id: int):
+        super().__init__(f"User with id {user_id} not found")
+
+
+class InvalidCredentialsError(AppException):
+    def __init__(self):
+        super().__init__("Invalid email or password")
+
+
+class TokenExpiredError(AppException):
+    def __init__(self):
+        super().__init__("Token has expired, please login again")
+
+
+class InvalidTokenError(AppException):
+    def __init__(self):
+        super().__init__("Invalid token")

@@ -6,6 +6,9 @@ from real_estate_backend.core.exceptions import (
     ConflictError,
     PermissionDeniedError,
     AppException,
+    InvalidCredentialsError,
+    InvalidTokenError,
+    TokenExpiredError,
 )
 
 
@@ -49,4 +52,24 @@ async def app_exception_handler(request: Request, exc: AppException):
     return JSONResponse(
         status_code=500,
         content={"error": "Internal Error", "message": exc.message}
+    )
+    
+async def invalid_credentials_handler(request, exc: InvalidCredentialsError):
+    return JSONResponse(
+        status_code=401,
+        content={"error": "Unauthorized", "message": exc.message}
+    )
+
+
+async def invalid_token_handler(request, exc: InvalidTokenError):
+    return JSONResponse(
+        status_code=401,
+        content={"error": "Unauthorized", "message": exc.message}
+    )
+
+
+async def token_expired_handler(request, exc: TokenExpiredError):
+    return JSONResponse(
+        status_code=401,
+        content={"error": "Unauthorized", "message": exc.message}
     )

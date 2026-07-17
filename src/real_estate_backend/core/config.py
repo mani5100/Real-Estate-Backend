@@ -4,6 +4,8 @@ class Settings(BaseSettings):
     app_name:str="Real Estate Backend"
     debug_mode:bool=False
     database_url:str
+    secret_key:str
+    access_token_expire_hours: int = 24
     
     model_config=SettingsConfigDict(
         case_sensitive=False,
