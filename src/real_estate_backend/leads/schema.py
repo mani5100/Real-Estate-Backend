@@ -10,7 +10,7 @@ class LeadBase(BaseModel):
     customer_id: int
     property_id: int
     status: LeadStatus = LeadStatus.NEW
-    agent_id: Optional[str] = None
+    agent_id: Optional[int] = None
     notes: Optional[str] = None
 
 
@@ -20,7 +20,7 @@ class LeadCreate(LeadBase):
 
 class LeadUpdate(BaseModel):
     status: Optional[LeadStatus] = None
-    agent_id: Optional[str] = None
+    agent_id: Optional[int] = None
     notes: Optional[str] = None
 
 

@@ -27,7 +27,6 @@ from real_estate_backend.core.middleware import RequestLoggingMiddleware
 import real_estate_backend.core.listeners
 
 app = FastAPI(title="Real Estate Backend")
-
 app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(customers_router)

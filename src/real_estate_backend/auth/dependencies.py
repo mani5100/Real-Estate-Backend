@@ -14,7 +14,7 @@ from real_estate_backend.users.model import User
 
 # Tells FastAPI where to find the token
 # tokenUrl is what Swagger uses for the Authorize button
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 
 def get_current_user(
@@ -26,6 +26,8 @@ def get_current_user(
     Returns the user object if valid.
     Raises 401 if anything is wrong.
     """
+    if token is None:
+        raise InvalidTokenError()
     try:
         payload = decode_access_token(token)
         user_id: int = payload.get("user_id")
