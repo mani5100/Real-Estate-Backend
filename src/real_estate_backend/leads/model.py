@@ -22,7 +22,9 @@ class Lead(Base):
     customer_id:Mapped[int]=mapped_column(ForeignKey("customers.id"),nullable=False,index=True)
     property_id:Mapped[int]=mapped_column(ForeignKey("properties.id"),nullable=False,index=True)
     status:Mapped[LeadStatus]=mapped_column(SAEnum(LeadStatus),default=LeadStatus.NEW,nullable=False)
-    agent_id: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
+    agent_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
     notes:Mapped[str]=mapped_column(String,nullable=True)
     created_at:Mapped[DateTime]=mapped_column(DateTime,server_default=func.now())
     updated_at:Mapped[DateTime]=mapped_column(DateTime,server_default=func.now(),onupdate=func.now())
