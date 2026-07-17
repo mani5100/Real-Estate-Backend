@@ -17,6 +17,7 @@ from real_estate_backend.core.exception_handlers import (
     validation_exception_handler
 )
 from real_estate_backend.core.middleware import RequestLoggingMiddleware
+import real_estate_backend.core.listeners
 
 app = FastAPI(title="Real Estate Backend")
 

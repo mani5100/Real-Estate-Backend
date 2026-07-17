@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, func
+from real_estate_backend.core.event_bus import event_bus
+from real_estate_backend.core.events import LeadStatusChangedEvent
 from real_estate_backend.core.exceptions import (
     LeadNotFoundError,
     CustomerNotFoundError,
@@ -90,11 +92,27 @@ def update_lead(db: Session, lead_id: int, data: LeadUpdate) -> Lead:
     if not lead:
         raise LeadNotFoundError(lead_id)
 
+    old_status = lead.status
+    
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(lead, field, value)
 
     db.commit()
     db.refresh(lead)
+    
+    if data.status and data.status != old_status:
+        event_bus.emit(
+            "lead.status.changed",
+            LeadStatusChangedEvent(
+                lead_id=lead.id,
+                customer_id=lead.customer_id,
+                property_id=lead.property_id,
+                old_status=old_status,
+                new_status=lead.status,
+                agent_id=lead.agent_id,
+            )
+        )
+
     return lead
 
 @log_call
