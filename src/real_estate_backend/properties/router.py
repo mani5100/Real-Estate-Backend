@@ -4,7 +4,7 @@ from typing import Any
 from real_estate_backend.core.database import get_db
 from real_estate_backend.properties.schema import PropertyCreate, PropertyUpdate, PropertyResponse, PropertyListResponse
 from real_estate_backend.properties import service
-from real_estate_backend.auth.dependencies import get_current_user
+from real_estate_backend.auth.dependencies import get_current_user, require_admin, require_agent_or_admin
 from real_estate_backend.users.model import User
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
@@ -33,15 +33,15 @@ def get_property(property_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=PropertyResponse, status_code=201)
-def create_property(data: PropertyCreate, db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
+def create_property(data: PropertyCreate, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin)):
     return service.create_property(db, data)
 
 
 @router.patch("/{property_id}", response_model=PropertyResponse)
-def update_property(property_id: int, data: PropertyUpdate, db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
+def update_property(property_id: int, data: PropertyUpdate, db: Session = Depends(get_db),current_user: User = Depends(require_admin)):
     return service.update_property(db, property_id, data)
 
 
 @router.delete("/{property_id}", status_code=204)
-def delete_property(property_id: int, db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
+def delete_property(property_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_admin)):
     service.delete_property(db, property_id)

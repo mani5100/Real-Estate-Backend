@@ -46,6 +46,17 @@ class CustomerUpdate(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     is_active: Optional[bool] = None
+    
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        v = v.strip()
+        # Allows: 03001234567, +923001234567, 0300-1234567
+        if not re.match(r"^\+?[\d\s\-]{7,20}$", v):
+            raise ValueError("phone must contain only digits, spaces, hyphens, or + prefix")
+        return v
 
 
 class CustomerResponse(CustomerBase):

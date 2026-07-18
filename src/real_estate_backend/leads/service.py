@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, func
+from real_estate_backend.core.enums import UserRole
 from real_estate_backend.core.event_bus import event_bus
 from real_estate_backend.core.events import LeadStatusChangedEvent
 from real_estate_backend.core.exceptions import (
@@ -16,6 +17,7 @@ from real_estate_backend.core.logging import log_call
 @log_call
 def get_all_leads(
     db: Session,
+    current_user,
     status: LeadStatus | None,
     agent_id: str | None,
     customer_id: int | None,
@@ -26,6 +28,12 @@ def get_all_leads(
 ):
     stmt = select(Lead)
 
+    if current_user.role == UserRole.AGENT:
+        stmt = stmt.where(Lead.agent_id == current_user.id)
+    
+    if current_user.role == UserRole.ADMIN:
+        stmt = stmt.where(Lead.agent_id == agent_id)
+        
     if status:
         stmt = stmt.where(Lead.status == status)
     if agent_id:
