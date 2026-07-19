@@ -18,7 +18,6 @@ def get_client_key(request: Request, current_user: User | None) -> str:
     if current_user:
         return f"user:{current_user.id}"
 
-    # Extract real IP — handles proxies
     forwarded_for = request.headers.get("X-Forwarded-For")
     if forwarded_for:
         ip = forwarded_for.split(",")[0].strip()

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
+from real_estate_backend.core.websocket_manager import ws_manager
 
 from real_estate_backend.core.database import get_db
 from real_estate_backend.leads.model import Lead, LeadStatus
@@ -45,3 +46,22 @@ def update_lead(lead_id: int, data: LeadUpdate, db: Session = Depends(get_db), l
 @router.delete("/{lead_id}", status_code=204)
 def delete_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin),_: None = Depends(rate_limiter)):
     service.delete_lead(db, lead_id)
+
+
+@router.websocket("/ws/{lead_id}")
+async def lead_status_websocket(lead_id: int, websocket: WebSocket):
+
+    await ws_manager.connect(lead_id, websocket)
+
+    try:
+        await websocket.send_json({
+            "type": "connected",
+            "lead_id": lead_id,
+            "message": f"Watching lead {lead_id} for status changes"
+        })
+
+        while True:
+            data = await websocket.receive_text()
+
+    except WebSocketDisconnect:
+        ws_manager.disconnect(lead_id, websocket)
