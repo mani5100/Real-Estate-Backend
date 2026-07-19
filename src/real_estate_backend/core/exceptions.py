@@ -85,3 +85,8 @@ class RateLimitExceededError(AppException):
     def __init__(self, retry_after: int):
         self.retry_after = retry_after
         super().__init__(f"Rate limit exceeded. Try again in {retry_after} seconds.")
+
+# Webhook Signature Exception
+class WebhookSignatureError(AppException):
+    def __init__(self, message: str = "Invalid webhook signature"):
+        super().__init__(message)

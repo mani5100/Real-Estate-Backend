@@ -5,6 +5,7 @@ from real_estate_backend.customers.router import router as customers_router
 from real_estate_backend.properties.router import router as properties_router
 from real_estate_backend.leads.router import router as leads_router
 from real_estate_backend.auth.router import router as auth_router
+from real_estate_backend.webhooks.router import router as webhooks_router
 from fastapi.exceptions import RequestValidationError
 from real_estate_backend.core.exceptions import (
     InvalidCredentialsError,
@@ -15,6 +16,7 @@ from real_estate_backend.core.exceptions import (
     AppException,
     RateLimitExceededError,
     TokenExpiredError,
+    WebhookSignatureError
 )
 from real_estate_backend.core.exception_handlers import (
     invalid_credentials_handler,
@@ -25,8 +27,11 @@ from real_estate_backend.core.exception_handlers import (
     app_exception_handler,
     rate_limit_exceeded_handler,
     token_expired_handler,
-    validation_exception_handler
+    validation_exception_handler,
+    webhook_signature_handler
 )
+
+
 from real_estate_backend.core.middleware import RequestLoggingMiddleware
 import real_estate_backend.core.listeners
 
@@ -37,6 +42,7 @@ app.include_router(customers_router)
 app.include_router(properties_router)
 app.include_router(leads_router)
 app.include_router(auth_router)
+app.include_router(webhooks_router)
 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(NotFoundError, not_found_handler)
@@ -47,6 +53,7 @@ app.add_exception_handler(InvalidCredentialsError, invalid_credentials_handler)
 app.add_exception_handler(InvalidTokenError, invalid_token_handler)
 app.add_exception_handler(TokenExpiredError, token_expired_handler)
 app.add_exception_handler(RateLimitExceededError, rate_limit_exceeded_handler)
+app.add_exception_handler(WebhookSignatureError, webhook_signature_handler)
 
 
 @app.get("/")

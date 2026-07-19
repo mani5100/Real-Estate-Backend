@@ -10,6 +10,7 @@ from real_estate_backend.core.exceptions import (
     InvalidTokenError,
     RateLimitExceededError,
     TokenExpiredError,
+    WebhookSignatureError
 )
 
 
@@ -86,5 +87,14 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceededEr
             "error": "Too Many Requests",
             "message": exc.message,
             "retry_after": exc.retry_after,
+        }
+    )
+
+async def webhook_signature_handler(request: Request, exc: WebhookSignatureError):
+    return JSONResponse(
+        status_code=401,
+        content={
+            "error": "Unauthorized",
+            "message": exc.message,
         }
     )
