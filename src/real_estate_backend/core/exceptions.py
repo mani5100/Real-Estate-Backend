@@ -79,3 +79,9 @@ class TokenExpiredError(AppException):
 class InvalidTokenError(AppException):
     def __init__(self):
         super().__init__("Invalid token")
+        
+# Rate Limiting Exceptions
+class RateLimitExceededError(AppException):
+    def __init__(self, retry_after: int):
+        self.retry_after = retry_after
+        super().__init__(f"Rate limit exceeded. Try again in {retry_after} seconds.")

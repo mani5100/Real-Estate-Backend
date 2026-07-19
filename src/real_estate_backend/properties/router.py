@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import Any
+from real_estate_backend.core.rate_limiter import rate_limiter
 from real_estate_backend.core.database import get_db
 from real_estate_backend.properties.schema import PropertyCreate, PropertyUpdate, PropertyResponse, PropertyListResponse
 from real_estate_backend.properties import service
@@ -11,7 +12,7 @@ router = APIRouter(prefix="/properties", tags=["Properties"])
 
 
 @router.get("/", response_model=PropertyListResponse)
-def list_properties(
+async def list_properties(
     city: str | None = None,
     min_price: float | None = None,
     max_price: float | None = None,
@@ -33,15 +34,18 @@ def get_property(property_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=PropertyResponse, status_code=201)
-def create_property(data: PropertyCreate, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin)):
+def create_property(data: PropertyCreate, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin),
+    _: None = Depends(rate_limiter),):
     return service.create_property(db, data)
 
 
 @router.patch("/{property_id}", response_model=PropertyResponse)
-def update_property(property_id: int, data: PropertyUpdate, db: Session = Depends(get_db),current_user: User = Depends(require_admin)):
+def update_property(property_id: int, data: PropertyUpdate, db: Session = Depends(get_db),current_user: User = Depends(require_admin),
+    _: None = Depends(rate_limiter),):
     return service.update_property(db, property_id, data)
 
 
 @router.delete("/{property_id}", status_code=204)
-def delete_property(property_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_admin)):
+def delete_property(property_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_admin),
+    _: None = Depends(rate_limiter),):
     service.delete_property(db, property_id)

@@ -8,6 +8,7 @@ from real_estate_backend.core.exceptions import (
     AppException,
     InvalidCredentialsError,
     InvalidTokenError,
+    RateLimitExceededError,
     TokenExpiredError,
 )
 
@@ -72,4 +73,18 @@ async def token_expired_handler(request, exc: TokenExpiredError):
     return JSONResponse(
         status_code=401,
         content={"error": "Unauthorized", "message": exc.message}
+    )
+    
+    
+async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceededError):
+    return JSONResponse(
+        status_code=429,
+        headers={
+            "Retry-After": str(exc.retry_after),
+        },
+        content={
+            "error": "Too Many Requests",
+            "message": exc.message,
+            "retry_after": exc.retry_after,
+        }
     )

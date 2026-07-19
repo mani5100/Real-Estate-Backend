@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from real_estate_backend.core.rate_limiter import rate_limiter
 from real_estate_backend.core.database import get_db
 from real_estate_backend.customers.schema import CustomerCreate, CustomerUpdate, CustomerResponse,CustomerPaginatedResponse
 from real_estate_backend.customers import service
@@ -31,15 +32,18 @@ def get_customer(customer_id: int, db: Session = Depends(get_db), current_user: 
 
 
 @router.post("/", response_model=CustomerResponse, status_code=201)
-def create_customer(data: CustomerCreate, db: Session = Depends(get_db),current_user: User = Depends(require_admin)):
+def create_customer(data: CustomerCreate, db: Session = Depends(get_db),current_user: User = Depends(require_admin),
+    _: None = Depends(rate_limiter)):
     return service.create_customer(db, data)
 
 
 @router.patch("/{customer_id}", response_model=CustomerResponse)
-def update_customer(customer_id: int, data: CustomerUpdate, db: Session = Depends(get_db),current_user: User = Depends(require_admin)):
+def update_customer(customer_id: int, data: CustomerUpdate, db: Session = Depends(get_db),current_user: User = Depends(require_admin),
+    _: None = Depends(rate_limiter)):
     return service.update_customer(db, customer_id, data)
 
 
 @router.delete("/{customer_id}", status_code=204)
-def delete_customer(customer_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_admin)):
+def delete_customer(customer_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_admin),
+    _: None = Depends(rate_limiter)):
     service.delete_customer(db, customer_id)

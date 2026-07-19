@@ -7,6 +7,7 @@ from real_estate_backend.leads.schema import LeadCreate, LeadUpdate, LeadRespons
 from real_estate_backend.leads import service
 from real_estate_backend.auth.dependencies import require_admin, require_agent_or_admin, require_lead_ownership
 from real_estate_backend.users.model import User
+from real_estate_backend.core.rate_limiter import rate_limiter
 
 router = APIRouter(prefix="/leads", tags=["Leads"])
 
@@ -32,15 +33,15 @@ def get_lead(lead_id: int, db: Session = Depends(get_db), lead: Lead = Depends(r
 
 
 @router.post("/", response_model=LeadResponse, status_code=201)
-def create_lead(data: LeadCreate, db: Session = Depends(get_db), current_user: User = Depends(require_agent_or_admin),):
+def create_lead(data: LeadCreate, db: Session = Depends(get_db), current_user: User = Depends(require_agent_or_admin),_: None = Depends(rate_limiter)):
     return service.create_lead(db, data)
 
 
 @router.patch("/{lead_id}", response_model=LeadResponse)
-def update_lead(lead_id: int, data: LeadUpdate, db: Session = Depends(get_db), lead: Lead = Depends(require_lead_ownership),):
+def update_lead(lead_id: int, data: LeadUpdate, db: Session = Depends(get_db), lead: Lead = Depends(require_lead_ownership),_: None = Depends(rate_limiter)):
     return service.update_lead(db, lead_id, data)
 
 
 @router.delete("/{lead_id}", status_code=204)
-def delete_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin),):
+def delete_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin),_: None = Depends(rate_limiter)):
     service.delete_lead(db, lead_id)
