@@ -2,7 +2,7 @@ import logging
 import sys
 import functools
 import inspect
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import json as jsonlogger
 from real_estate_backend.core.request_context import get_request_id
 from real_estate_backend.core.config import settings
 from rich.logging import RichHandler

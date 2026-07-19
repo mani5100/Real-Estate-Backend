@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import datetime
 from typing import Optional
 
@@ -7,12 +7,22 @@ class PropertyBase(BaseModel):
     title: str
     city: str
     address: str
-    price: float
-    bedrooms: int = 1
-    bathrooms: int = 1
+    price: int = Field(gt=0)
+    bedrooms: int = Field(default=1, ge=0)
+    bathrooms: int = Field(default=1, ge=0)
     area_sqft: Optional[float] = None
     description: Optional[str] = None
     is_available: bool = True
+    
+    @field_validator("city")
+    @classmethod
+    def validate_city(cls, city: str) -> str:
+        city = city.strip()
+
+        if not city.replace(" ", "").isalpha():
+            raise ValueError("City must contain only letters and spaces")
+
+        return city
 
 
 class PropertyCreate(PropertyBase):
@@ -23,12 +33,25 @@ class PropertyUpdate(BaseModel):
     title: Optional[str] = None
     city: Optional[str] = None
     address: Optional[str] = None
-    price: Optional[float] = None
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
-    area_sqft: Optional[float] = None
+    price: Optional[int] = Field(default=None, gt=0)
+    bedrooms: Optional[int] = Field(default=None, ge=0)
+    bathrooms: Optional[int] = Field(default=None, ge=0)
+    area_sqft: Optional[float] = Field(default=None, gt=0)
     description: Optional[str] = None
     is_available: Optional[bool] = None
+    
+    @field_validator("city")
+    @classmethod
+    def validate_city(cls, city: Optional[str]) -> Optional[str]:
+        if city is None:
+            return None
+
+        city = city.strip()
+
+        if not city.replace(" ", "").isalpha():
+            raise ValueError("City must contain only letters and spaces")
+
+        return city
 
 
 class PropertyResponse(PropertyBase):

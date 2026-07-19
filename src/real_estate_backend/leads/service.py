@@ -30,9 +30,6 @@ def get_all_leads(
 
     if current_user.role == UserRole.AGENT:
         stmt = stmt.where(Lead.agent_id == current_user.id)
-    
-    if current_user.role == UserRole.ADMIN:
-        stmt = stmt.where(Lead.agent_id == agent_id)
         
     if status:
         stmt = stmt.where(Lead.status == status)
