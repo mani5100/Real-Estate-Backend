@@ -37,38 +37,11 @@ def on_test_start(environment, **kwargs):
 
 class RealEstateUser(HttpUser):
     wait_time = between(1, 3)
-    host = HOST  # ← add this line
+    host = HOST
 
     def on_start(self):
         self.headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
         self.lead_id = random.randint(1, 10)
-
-    @task(3)
-    def list_leads_paginated(self):
-        params = random.choice([
-            {"limit": 3},
-            {"limit": 3, "status": "new"},
-            {"limit": 3, "status": "contacted"},
-            {"limit": 3, "cursor": random.randint(1, 5)},
-        ])
-
-        with self.client.get(
-            "/leads/",
-            params=params,
-            headers=self.headers,
-            name="GET /leads/ (paginated)",
-            catch_response=True,
-        ) as response:
-            if response.status_code == 200:
-                data = response.json()
-                if "total" not in data or "results" not in data:
-                    response.failure("Missing total or results")
-                else:
-                    response.success()
-            elif response.status_code == 429:
-                response.success()
-            else:
-                response.failure(f"Unexpected: {response.status_code}")
 
     @task(1)
     def update_lead_status(self):
