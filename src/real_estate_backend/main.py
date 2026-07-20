@@ -6,6 +6,7 @@ from real_estate_backend.properties.router import router as properties_router
 from real_estate_backend.leads.router import router as leads_router
 from real_estate_backend.auth.router import router as auth_router
 from real_estate_backend.webhooks.router import router as webhooks_router
+from real_estate_backend.core.health import router as health_router
 from real_estate_backend.ai.router import router as ai_router
 from fastapi.exceptions import RequestValidationError
 from real_estate_backend.core.exceptions import (
@@ -45,6 +46,7 @@ app.include_router(leads_router)
 app.include_router(auth_router)
 app.include_router(webhooks_router)
 app.include_router(ai_router)
+app.include_router(health_router)
 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(NotFoundError, not_found_handler)
