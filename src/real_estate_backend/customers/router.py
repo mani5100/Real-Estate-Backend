@@ -25,7 +25,55 @@ def list_customers(
 ):
     return service.get_all_customers(db, is_active, search, phone, email, full_name, cursor, limit)
 
+@router.post(
+    "/me",
+    response_model=CustomerResponse,
+    status_code=201,
+)
+def create_my_customer_profile(
+    data: CustomerCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(rate_limiter),
+):
+    return service.create_my_customer_profile(
+        db=db,
+        current_user=current_user,
+        data=data,
+    )
 
+@router.get(
+    "/me",
+    response_model=CustomerResponse,
+    status_code=200,
+)
+def get_my_customer_profile(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return service.get_my_customer_profile(
+        db=db,
+        current_user=current_user,
+    )
+    
+@router.patch(
+    "/me",
+    response_model=CustomerResponse,
+    status_code=200,
+)
+def update_my_customer_profile(
+    data: CustomerUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(rate_limiter),
+):
+    return service.update_my_customer_profile(
+        db=db,
+        current_user=current_user,
+        data=data,
+    )
+    
+    x   
 @router.get("/{customer_id}", response_model=CustomerResponse)
 def get_customer(customer_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     return service.get_customer_by_id(db, customer_id)
@@ -47,3 +95,4 @@ def update_customer(customer_id: int, data: CustomerUpdate, db: Session = Depend
 def delete_customer(customer_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_admin),
     _: None = Depends(rate_limiter)):
     service.delete_customer(db, customer_id)
+    

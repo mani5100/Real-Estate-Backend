@@ -90,3 +90,11 @@ class RateLimitExceededError(AppException):
 class WebhookSignatureError(AppException):
     def __init__(self, message: str = "Invalid webhook signature"):
         super().__init__(message)
+        
+class CustomerProfileAlreadyExistsError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__("customer profile already exists")
+        
+class CustomerProfileNotFoundError(NotFoundError):
+    def __init__(self) -> None:
+        super().__init__("customer profile not found")

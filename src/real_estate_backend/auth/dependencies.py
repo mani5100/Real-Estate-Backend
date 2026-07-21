@@ -97,8 +97,10 @@ def require_lead_ownership(
     if current_user.role == UserRole.ADMIN:
         return lead
 
-    if current_user.role == UserRole.CUSTOMER:
-        raise PermissionDeniedError("customers cannot access leads")
+    if current_user.role == UserRole.USER:
+        raise PermissionDeniedError(
+            "users cannot access leads"
+        )
 
     if lead.agent_id != current_user.id:
         raise PermissionDeniedError("you can only access leads assigned to you")
