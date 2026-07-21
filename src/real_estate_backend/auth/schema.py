@@ -7,7 +7,6 @@ class SignupRequest(BaseModel):
     email: EmailStr
     password: str
     full_name: str
-    role: UserRole
 
     @field_validator("password")
     @classmethod

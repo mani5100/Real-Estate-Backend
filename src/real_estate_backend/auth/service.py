@@ -8,26 +8,38 @@ from real_estate_backend.core.exceptions import (
     InvalidCredentialsError,
     UserNotFoundError,
 )
+from real_estate_backend.core.enums import UserRole
 from real_estate_backend.core.logging import log_call
 
 
 @log_call
 def signup(db: Session, data: SignupRequest) -> User:
-    existing = db.scalar(select(User).where(User.email == data.email))
-    if existing:
-        raise EmailAlreadyExistsError(data.email)
+    normalized_email = str(data.email).lower()
+
+    existing_user = db.scalar(
+        select(User).where(User.email == normalized_email)
+    )
+
+    if existing_user:
+        raise EmailAlreadyExistsError(normalized_email)
 
     user = User(
-        email=data.email,
-        password=hash_password(data.password),  # never store plain text
+        email=normalized_email,
+        password=hash_password(data.password),
         full_name=data.full_name,
-        role=data.role,
+        role=UserRole.USER,
     )
+
     db.add(user)
-    db.commit()
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
     db.refresh(user)
     return user
-
 
 @log_call
 def login(db: Session, data: LoginRequest) -> TokenResponse:

@@ -5,24 +5,10 @@ import re
 
 
 class CustomerBase(BaseModel):
-    full_name: str
-    email: EmailStr
     phone: Optional[str] = None
-    is_active: bool = True
+    model_config = ConfigDict(extra="forbid")
     
-    @field_validator("full_name")
-    @classmethod
-    def validate_full_name(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError("full_name cannot be empty")
-        if not re.match(r"^[A-Za-z\s]+$", v):
-            raise ValueError("full_name must contain only letters and spaces")
-        if len(v) < 2:
-            raise ValueError("full_name must be at least 2 characters")
-        if len(v) > 100:
-            raise ValueError("full_name cannot exceed 100 characters")
-        return v
+
     
     @field_validator("phone")
     @classmethod
@@ -37,32 +23,64 @@ class CustomerBase(BaseModel):
 
 
 
-class CustomerCreate(CustomerBase):
-    pass
+class CustomerCreate(BaseModel):
+    phone: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+
+        value = value.strip()
+
+        if not re.fullmatch(r"\+?[\d\s\-]{7,20}", value):
+            raise ValueError(
+                "phone must contain only digits, spaces, hyphens, "
+                "or a leading +"
+            )
+
+        return value
 
 
 class CustomerUpdate(BaseModel):
-    full_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    is_active: Optional[bool] = None
-    
+    phone: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
     @field_validator("phone")
     @classmethod
-    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return v
-        v = v.strip()
-        # Allows: 03001234567, +923001234567, 0300-1234567
-        if not re.match(r"^\+?[\d\s\-]{7,20}$", v):
-            raise ValueError("phone must contain only digits, spaces, hyphens, or + prefix")
-        return v
+    def validate_phone(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
 
+        value = value.strip()
 
-class CustomerResponse(CustomerBase):
+        if not re.fullmatch(r"\+?[\d\s\-]{7,20}", value):
+            raise ValueError(
+                "phone must contain only digits, spaces, hyphens, "
+                "or a leading +"
+            )
+
+        return value
+    
+class CustomerUserResponse(BaseModel):
     id: int
+    email: str
+    full_name: str
+    is_active: bool
+
+    model_config = ConfigDict(from_attributes=True)
+    
+class CustomerResponse(BaseModel):
+    id: int
+    user_id: int
+    phone: str | None
     created_at: datetime
     updated_at: datetime
+    user: CustomerUserResponse
 
     model_config = ConfigDict(from_attributes=True)
     
