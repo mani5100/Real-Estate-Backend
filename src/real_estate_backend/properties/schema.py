@@ -56,6 +56,7 @@ class PropertyUpdate(BaseModel):
 
 class PropertyResponse(PropertyBase):
     id: int
+    agent_id: int
     created_at: datetime
     updated_at: datetime
 

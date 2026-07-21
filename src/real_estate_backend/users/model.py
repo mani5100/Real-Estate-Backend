@@ -1,8 +1,12 @@
+from __future__ import annotations
 from sqlalchemy import String, Boolean, DateTime, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from real_estate_backend.core.database import Base
 from real_estate_backend.core.enums import UserRole
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from real_estate_backend.properties.model import Property
 
 
 class User(Base):
@@ -20,4 +24,9 @@ class User(Base):
     )
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    
+    properties: Mapped[list[Property]] = relationship(
+        "Property",
+        back_populates="agent",
     )

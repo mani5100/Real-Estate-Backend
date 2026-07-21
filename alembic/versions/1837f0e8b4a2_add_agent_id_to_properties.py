@@ -1,8 +1,8 @@
-"""add users table and update foreign keys
+"""add agent id to properties
 
-Revision ID: 0d19eae09a65
+Revision ID: 1837f0e8b4a2
 Revises: 
-Create Date: 2026-07-17 12:42:22.752346
+Create Date: 2026-07-21 14:18:03.779725
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0d19eae09a65'
+revision: str = '1837f0e8b4a2'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

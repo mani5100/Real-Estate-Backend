@@ -56,8 +56,8 @@ def get_property_by_id(db: Session, property_id: int) -> Property:
     return prop
 
 @log_call
-def create_property(db: Session, data: PropertyCreate) -> Property:
-    prop = Property(**data.model_dump())
+def create_property(db: Session, data: PropertyCreate, agent_id: int,) -> Property:
+    prop = Property(**data.model_dump(), agent_id=agent_id)
     db.add(prop)
     db.commit()
     db.refresh(prop)

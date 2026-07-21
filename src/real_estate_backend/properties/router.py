@@ -36,16 +36,16 @@ def get_property(property_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=PropertyResponse, status_code=201)
 def create_property(data: PropertyCreate, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin),
     _: None = Depends(rate_limiter),):
-    return service.create_property(db, data)
+    return service.create_property(db, data,agent_id=current_user.id)
 
 
 @router.patch("/{property_id}", response_model=PropertyResponse)
-def update_property(property_id: int, data: PropertyUpdate, db: Session = Depends(get_db),current_user: User = Depends(require_admin),
+def update_property(property_id: int, data: PropertyUpdate, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin),
     _: None = Depends(rate_limiter),):
     return service.update_property(db, property_id, data)
 
 
 @router.delete("/{property_id}", status_code=204)
-def delete_property(property_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_admin),
+def delete_property(property_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin),
     _: None = Depends(rate_limiter),):
     service.delete_property(db, property_id)
