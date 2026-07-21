@@ -52,7 +52,7 @@ async def analyze_stream():
         yield "event: connected\ndata: stream started\n\n"
 
         for index, chunk in enumerate(ai_chunks, start=1):
-            await asyncio.sleep(15)
+            await asyncio.sleep(3)
 
             logger.info(
                 "Streaming AI chunk",

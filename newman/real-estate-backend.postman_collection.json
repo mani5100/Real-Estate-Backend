@@ -15,17 +15,39 @@
           "item": [
             {
               "name": "Get Customer",
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "",
-                      "type": "string"
-                    }
-                  ]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const json = pm.response.json();\r",
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+                      "pm.test(\"Response time < 5s\", () => pm.expect(pm.response.responseTime).to.be.below(5000));\r",
+                      "pm.test(\"Response has expected JSON shape\", function() {\r",
+                      "    pm.expect(json).to.have.property(\"id\");\r",
+                      "    pm.expect(json).to.have.property(\"full_name\");\r",
+                      "    pm.expect(json).to.have.property(\"email\");\r",
+                      "    pm.expect(json).to.have.property(\"is_active\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
                 },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
                 "method": "GET",
                 "header": [
                   {
@@ -45,7 +67,7 @@
                   "variable": [
                     {
                       "key": "customer_id",
-                      "value": "10"
+                      "value": "1"
                     }
                   ]
                 }
@@ -143,22 +165,27 @@
             },
             {
               "name": "Update Customer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const json = pm.response.json();\r",
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+                      "pm.test(\"Response time < 5s\", () => pm.expect(pm.response.responseTime).to.be.below(5000));\r",
+                      "pm.test(\"Response has expected JSON shape\", function() {\r",
+                      "    pm.expect(json).to.have.property(\"id\");\r",
+                      "    pm.expect(json).to.have.property(\"full_name\");\r",
+                      "    pm.expect(json).to.have.property(\"email\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
               "request": {
-                "auth": {
-                  "type": "oauth2",
-                  "oauth2": [
-                    {
-                      "key": "accessTokenUrl",
-                      "value": "/auth/login",
-                      "type": "string"
-                    },
-                    {
-                      "key": "grant_type",
-                      "value": "password_credentials",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "PATCH",
                 "header": [
                   {
@@ -172,7 +199,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"full_name\": \"string\",\n  \"email\": \"NPUH96P1@lTMwbxgiQMSEEiERTkLRAwtvxVwQYXzB.rofc\",\n  \"phone\": \"string\",\n  \"is_active\": true\n}",
+                  "raw": "{\n  \"phone\": \"03009999999\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -192,7 +219,7 @@
                   "variable": [
                     {
                       "key": "customer_id",
-                      "value": "1822"
+                      "value": "1"
                     }
                   ]
                 }
@@ -318,22 +345,40 @@
             },
             {
               "name": "Delete Customer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Delete Customer returns expected status\", function () {\r",
+                      "    pm.expect(pm.response.code).to.be.oneOf([204, 409]);\r",
+                      "});\r",
+                      "\r",
+                      "if (pm.response.code === 409) {\r",
+                      "    pm.test(\"Conflict response explains the failure\", function () {\r",
+                      "        const contentType = pm.response.headers.get(\"Content-Type\") || \"\";\r",
+                      "        const body = pm.response.text();\r",
+                      "\r",
+                      "        if (contentType.includes(\"application/json\")) {\r",
+                      "            const json = pm.response.json();\r",
+                      "\r",
+                      "            pm.expect(json).to.be.an(\"object\");\r",
+                      "            pm.expect(\r",
+                      "                json.error || json.message || json.detail\r",
+                      "            ).to.exist;\r",
+                      "        } else {\r",
+                      "            pm.expect(body.trim()).to.not.be.empty;\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
               "request": {
-                "auth": {
-                  "type": "oauth2",
-                  "oauth2": [
-                    {
-                      "key": "accessTokenUrl",
-                      "value": "/auth/login",
-                      "type": "string"
-                    },
-                    {
-                      "key": "grant_type",
-                      "value": "password_credentials",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "DELETE",
                 "header": [
                   {
@@ -353,7 +398,7 @@
                   "variable": [
                     {
                       "key": "customer_id",
-                      "value": "1822"
+                      "value": "2"
                     }
                   ]
                 }
@@ -445,21 +490,6 @@
         {
           "name": "List Customers",
           "request": {
-            "auth": {
-              "type": "oauth2",
-              "oauth2": [
-                {
-                  "key": "accessTokenUrl",
-                  "value": "/auth/login",
-                  "type": "string"
-                },
-                {
-                  "key": "grant_type",
-                  "value": "password_credentials",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "GET",
             "header": [
               {
@@ -650,21 +680,6 @@
         {
           "name": "Create Customer",
           "request": {
-            "auth": {
-              "type": "oauth2",
-              "oauth2": [
-                {
-                  "key": "accessTokenUrl",
-                  "value": "/auth/login",
-                  "type": "string"
-                },
-                {
-                  "key": "grant_type",
-                  "value": "password_credentials",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "POST",
             "header": [
               {
@@ -678,7 +693,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"full_name\": \"string\",\n  \"email\": \"ow-TT@bHFEKqhiPeXs.ogv\",\n  \"phone\": null,\n  \"is_active\": true\n}",
+              "raw": "{\n  \"full_name\": \"Test Customer\",\n  \"email\": \"testcustomer@test.com\",\n  \"phone\": \"03001234567\",\n  \"is_active\": true\n}",
               "options": {
                 "raw": {
                   "headerFamily": "json",
@@ -818,6 +833,9 @@
                 {
                   "name": "Get Properties By Bedrooms",
                   "request": {
+                    "auth": {
+                      "type": "noauth"
+                    },
                     "method": "GET",
                     "header": [
                       {
@@ -1044,21 +1062,6 @@
             {
               "name": "Update Property",
               "request": {
-                "auth": {
-                  "type": "oauth2",
-                  "oauth2": [
-                    {
-                      "key": "accessTokenUrl",
-                      "value": "/auth/login",
-                      "type": "string"
-                    },
-                    {
-                      "key": "grant_type",
-                      "value": "password_credentials",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "PATCH",
                 "header": [
                   {
@@ -1072,7 +1075,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": null,\n  \"city\": null,\n  \"address\": null,\n  \"price\": 6649.003688412441,\n  \"bedrooms\": null,\n  \"bathrooms\": 6016,\n  \"area_sqft\": null,\n  \"description\": \"string\",\n  \"is_available\": true\n}",
+                  "raw": "{\n  \"price\": 6000000\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -1219,21 +1222,6 @@
             {
               "name": "Delete Property",
               "request": {
-                "auth": {
-                  "type": "oauth2",
-                  "oauth2": [
-                    {
-                      "key": "accessTokenUrl",
-                      "value": "/auth/login",
-                      "type": "string"
-                    },
-                    {
-                      "key": "grant_type",
-                      "value": "password_credentials",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "DELETE",
                 "header": [
                   {
@@ -1525,21 +1513,6 @@
         {
           "name": "Create Property",
           "request": {
-            "auth": {
-              "type": "oauth2",
-              "oauth2": [
-                {
-                  "key": "accessTokenUrl",
-                  "value": "/auth/login",
-                  "type": "string"
-                },
-                {
-                  "key": "grant_type",
-                  "value": "password_credentials",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "POST",
             "header": [
               {
@@ -1553,7 +1526,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"string\",\n  \"city\": \"string\",\n  \"address\": \"string\",\n  \"price\": 2672.1938770722677,\n  \"bedrooms\": 1,\n  \"bathrooms\": 1,\n  \"area_sqft\": 1875.855746853684,\n  \"description\": \"string\",\n  \"is_available\": true\n}",
+              "raw": "{\n  \"title\": \"Test Property\",\n  \"city\": \"Lahore\",\n  \"address\": \"12 Gulberg Street\",\n  \"price\": 5000000,\n  \"bedrooms\": 3,\n  \"bathrooms\": 2,\n  \"area_sqft\": 1200,\n  \"is_available\": true\n}",
               "options": {
                 "raw": {
                   "headerFamily": "json",
@@ -1690,21 +1663,6 @@
             {
               "name": "Get Lead",
               "request": {
-                "auth": {
-                  "type": "oauth2",
-                  "oauth2": [
-                    {
-                      "key": "accessTokenUrl",
-                      "value": "/auth/login",
-                      "type": "string"
-                    },
-                    {
-                      "key": "grant_type",
-                      "value": "password_credentials",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "GET",
                 "header": [
                   {
@@ -1823,21 +1781,6 @@
             {
               "name": "Update Lead",
               "request": {
-                "auth": {
-                  "type": "oauth2",
-                  "oauth2": [
-                    {
-                      "key": "accessTokenUrl",
-                      "value": "/auth/login",
-                      "type": "string"
-                    },
-                    {
-                      "key": "grant_type",
-                      "value": "password_credentials",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "PATCH",
                 "header": [
                   {
@@ -1851,7 +1794,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"status\": \"closed\",\n  \"agent_id\": 6402,\n  \"notes\": null\n}",
+                  "raw": "{\n  \"status\": \"contacted\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -1871,7 +1814,7 @@
                   "variable": [
                     {
                       "key": "lead_id",
-                      "value": "6716"
+                      "value": "1"
                     }
                   ]
                 }
@@ -1998,21 +1941,6 @@
             {
               "name": "Delete Lead",
               "request": {
-                "auth": {
-                  "type": "oauth2",
-                  "oauth2": [
-                    {
-                      "key": "accessTokenUrl",
-                      "value": "/auth/login",
-                      "type": "string"
-                    },
-                    {
-                      "key": "grant_type",
-                      "value": "password_credentials",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "DELETE",
                 "header": [
                   {
@@ -2124,21 +2052,6 @@
         {
           "name": "List Leads",
           "request": {
-            "auth": {
-              "type": "oauth2",
-              "oauth2": [
-                {
-                  "key": "accessTokenUrl",
-                  "value": "/auth/login",
-                  "type": "string"
-                },
-                {
-                  "key": "grant_type",
-                  "value": "password_credentials",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "GET",
             "header": [
               {
@@ -2328,22 +2241,20 @@
         },
         {
           "name": "Create Lead",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
-            "auth": {
-              "type": "oauth2",
-              "oauth2": [
-                {
-                  "key": "accessTokenUrl",
-                  "value": "/auth/login",
-                  "type": "string"
-                },
-                {
-                  "key": "grant_type",
-                  "value": "password_credentials",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "POST",
             "header": [
               {
@@ -2357,7 +2268,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customer_id\": 1479,\n  \"property_id\": 4523,\n  \"status\": \"closed\",\n  \"agent_id\": null,\n  \"notes\": \"string\"\n}",
+              "raw": "{\n  \"customer_id\": 1,\n  \"property_id\": 1,\n  \"status\": \"new\",\n  \"agent_id\": 1,\n  \"notes\": \"Test lead from Postman\"\n}",
               "options": {
                 "raw": {
                   "headerFamily": "json",
@@ -2494,6 +2405,9 @@
             {
               "name": "Signup",
               "request": {
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -2507,7 +2421,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"sUhQseP@UZqRMJhNYklmu.yagi\",\n  \"password\": \"string\",\n  \"full_name\": \"string\",\n  \"role\": \"agent\"\n}",
+                  "raw": "{\n  \"email\": \"newuser@test.com\",\n  \"password\": \"Test1234\",\n  \"full_name\": \"New User\",\n  \"role\": \"agent\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -2631,6 +2545,9 @@
             {
               "name": "Login",
               "request": {
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -2832,6 +2749,9 @@
         {
           "name": "Root",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [
               {
@@ -2939,7 +2859,91 @@
         "packages": {},
         "requests": {},
         "exec": [
-          ""
+          "{\r",
+          "    /*\r",
+          "    |--------------------------------------------------------------------------\r",
+          "    | Collection-level Post-response tests\r",
+          "    |--------------------------------------------------------------------------\r",
+          "    */\r",
+          "\r",
+          "    const statusCode = pm.response.code;\r",
+          "    const responseBody = pm.response.text();\r",
+          "    const contentType =\r",
+          "        pm.response.headers.get(\"Content-Type\") || \"\";\r",
+          "\r",
+          "    pm.test(\"Response time is less than 5 seconds\", function () {\r",
+          "        pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+          "    });\r",
+          "\r",
+          "    pm.test(\"Response has a valid HTTP status code\", function () {\r",
+          "        pm.expect(statusCode).to.be.within(100, 599);\r",
+          "    });\r",
+          "\r",
+          "    pm.test(\"Response is not a server error\", function () {\r",
+          "        pm.expect(\r",
+          "            statusCode,\r",
+          "            `Server returned ${statusCode}: ${responseBody}`\r",
+          "        ).to.be.below(500);\r",
+          "    });\r",
+          "\r",
+          "    if (contentType.toLowerCase().includes(\"application/json\")) {\r",
+          "        pm.test(\"JSON response body is valid\", function () {\r",
+          "            pm.expect(function () {\r",
+          "                JSON.parse(responseBody);\r",
+          "            }).to.not.throw();\r",
+          "        });\r",
+          "    }\r",
+          "\r",
+          "    if (\r",
+          "        statusCode >= 200 &&\r",
+          "        statusCode < 300 &&\r",
+          "        statusCode !== 204 &&\r",
+          "        responseBody.trim().length > 0\r",
+          "    ) {\r",
+          "        pm.test(\"Successful response Content-Type is supported\", function () {\r",
+          "            const supportedContentType =\r",
+          "                contentType.includes(\"application/json\") ||\r",
+          "                contentType.includes(\"text/plain\") ||\r",
+          "                contentType.includes(\"text/csv\") ||\r",
+          "                contentType.includes(\"application/octet-stream\");\r",
+          "\r",
+          "            pm.expect(\r",
+          "                supportedContentType,\r",
+          "                `Unexpected Content-Type: ${contentType}`\r",
+          "            ).to.eql(true);\r",
+          "        });\r",
+          "    }\r",
+          "\r",
+          "    if (\r",
+          "        statusCode >= 400 &&\r",
+          "        contentType.toLowerCase().includes(\"application/json\")\r",
+          "    ) {\r",
+          "        pm.test(\"JSON error response has a useful message\", function () {\r",
+          "            const json = pm.response.json();\r",
+          "\r",
+          "            pm.expect(json).to.be.an(\"object\");\r",
+          "\r",
+          "            const hasUsefulMessage =\r",
+          "                Object.prototype.hasOwnProperty.call(json, \"error\") ||\r",
+          "                Object.prototype.hasOwnProperty.call(json, \"message\") ||\r",
+          "                Object.prototype.hasOwnProperty.call(json, \"detail\");\r",
+          "\r",
+          "            pm.expect(\r",
+          "                hasUsefulMessage,\r",
+          "                \"Expected error, message, or detail field\"\r",
+          "            ).to.eql(true);\r",
+          "        });\r",
+          "    }\r",
+          "\r",
+          "    if (\r",
+          "        statusCode >= 400 &&\r",
+          "        !contentType.toLowerCase().includes(\"application/json\")\r",
+          "    ) {\r",
+          "        pm.test(\"Error response body is not empty\", function () {\r",
+          "            pm.expect(responseBody.trim()).to.not.be.empty;\r",
+          "        });\r",
+          "    }\r",
+          "}"
         ]
       }
     }

@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     secret_key:str
     access_token_expire_hours: int = 24
     webhook_secret: str
+    rate_limit: int
+    window_seconds: int
     
     model_config=SettingsConfigDict(
         case_sensitive=False,

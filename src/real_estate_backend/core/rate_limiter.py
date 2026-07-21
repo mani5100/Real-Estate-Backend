@@ -3,10 +3,10 @@ from real_estate_backend.core.rate_limit_store import rate_limit_store
 from real_estate_backend.core.exceptions import RateLimitExceededError
 from real_estate_backend.auth.dependencies import get_current_user
 from real_estate_backend.users.model import User
+from real_estate_backend.core.config import settings
 
-# Configuration
-RATE_LIMIT = 5          # max requests
-WINDOW_SECONDS = 60     # per 60 seconds
+RATE_LIMIT = settings.rate_limit
+WINDOW_SECONDS = settings.window_seconds
 
 
 def get_client_key(request: Request, current_user: User | None) -> str:
