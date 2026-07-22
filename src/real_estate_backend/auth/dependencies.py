@@ -106,3 +106,14 @@ def require_lead_ownership(
         raise PermissionDeniedError("you can only access leads assigned to you")
 
     return lead
+
+
+def require_agent(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if current_user.role != UserRole.AGENT:
+        raise PermissionDeniedError(
+            "agent access required"
+        )
+
+    return current_user

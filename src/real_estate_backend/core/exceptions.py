@@ -98,3 +98,40 @@ class CustomerProfileAlreadyExistsError(ConflictError):
 class CustomerProfileNotFoundError(NotFoundError):
     def __init__(self) -> None:
         super().__init__("customer profile not found")
+        
+        
+class AgentApplicationAlreadyExistsError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__("agent application already exists")
+
+
+class AgentApplicationNotFoundError(NotFoundError):
+    def __init__(self) -> None:
+        super().__init__("agent application not found")
+
+
+class AgentAlreadyExistsError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__("user is already an agent")
+        
+        
+class AgentApplicationInvalidStatusError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__(
+            "agent application is not pending"
+        )
+
+
+class AgentLicenseAlreadyExistsError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__(
+            "license number is already in use"
+        )
+        
+class AgentProfileNotFoundError(NotFoundError):
+    def __init__(self) -> None:
+        super().__init__("agent profile not found")
+        
+class AgentNotFoundError(NotFoundError):
+    def __init__(self, agent_id: int) -> None:
+        super().__init__(f"agent with id {agent_id} not found")

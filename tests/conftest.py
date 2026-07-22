@@ -15,10 +15,13 @@ from real_estate_backend.core.security import (
 )
 from real_estate_backend.customers.model import Customer
 from real_estate_backend.leads.model import Lead, LeadStatus
-from real_estate_backend.main import app
 from real_estate_backend.properties.model import Property
 from real_estate_backend.users.model import User
-
+from real_estate_backend.main import app
+from real_estate_backend.agents.model import (
+    AgentApplication,
+    AgentProfile,
+)
 
 # ---------------------------------------------------------------------------
 # Test database

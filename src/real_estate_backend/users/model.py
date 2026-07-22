@@ -6,8 +6,8 @@ from real_estate_backend.core.database import Base
 from real_estate_backend.core.enums import UserRole
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from real_estate_backend.properties.model import Property
     from real_estate_backend.customers.model import Customer
+    from real_estate_backend.agents.model import AgentProfile, AgentApplication
 
 
 class User(Base):
@@ -39,7 +39,17 @@ class User(Base):
     cascade="all, delete-orphan",
     passive_deletes=True,
 )
-    properties: Mapped[list[Property]] = relationship(
-    "Property",
-    back_populates="agent",
+    agent_profile: Mapped[AgentProfile | None] = relationship(
+    "AgentProfile",
+    back_populates="user",
+    uselist=False,
+    cascade="all, delete-orphan",
+    passive_deletes=True,
+)
+    agent_application: Mapped[AgentApplication | None] = relationship(
+    "AgentApplication",
+    back_populates="user",
+    uselist=False,
+    cascade="all, delete-orphan",
+    passive_deletes=True,
 )

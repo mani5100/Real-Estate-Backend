@@ -1,6 +1,9 @@
-from sqlalchemy.orm import Session
+from locust import User
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select,func
+from real_estate_backend.agents.model import AgentProfile
 from real_estate_backend.core.exceptions import (
+    AgentProfileNotFoundError,
     PropertyNotFoundError,
     PropertyHasLeadsError,
     NoPropertiesFoundError
@@ -56,12 +59,40 @@ def get_property_by_id(db: Session, property_id: int) -> Property:
     return prop
 
 @log_call
-def create_property(db: Session, data: PropertyCreate, agent_id: int,) -> Property:
-    prop = Property(**data.model_dump(), agent_id=agent_id)
-    db.add(prop)
-    db.commit()
-    db.refresh(prop)
-    return prop
+def create_property(
+    db: Session,
+    current_user: User,
+    data: PropertyCreate,
+) -> Property:
+    agent_profile = db.scalar(
+        select(AgentProfile).where(
+            AgentProfile.user_id == current_user.id
+        )
+    )
+
+    if agent_profile is None:
+        raise AgentProfileNotFoundError()
+
+    property_record = Property(
+        **data.model_dump(),
+        agent_id=agent_profile.id,
+    )
+
+    db.add(property_record)
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    db.refresh(property_record)
+
+    return db.scalar(
+        select(Property)
+        .options(joinedload(Property.agent))
+        .where(Property.id == property_record.id)
+    )
 
 @log_call
 def update_property(db: Session, property_id: int, data: PropertyUpdate) -> Property:
