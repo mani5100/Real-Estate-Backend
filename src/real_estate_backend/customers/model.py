@@ -11,7 +11,7 @@ class Customer(Base):
     __tablename__="customers"
     
     id:Mapped[int]=mapped_column(primary_key=True,index=True)
-    phone:Mapped[str]=mapped_column(String(20),nullable=False)
+    phone:Mapped[str]=mapped_column(String(20),nullable=True)
     user_id: Mapped[int] = mapped_column(
         ForeignKey(
             "users.id",
