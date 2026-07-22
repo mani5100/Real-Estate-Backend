@@ -14,6 +14,7 @@ from real_estate_backend.core.security import (
     hash_password,
 )
 from real_estate_backend.customers.model import Customer
+from real_estate_backend.agents.model import AgentProfile
 from real_estate_backend.leads.model import Lead, LeadStatus
 from real_estate_backend.properties.model import Property
 from real_estate_backend.users.model import User
@@ -278,6 +279,30 @@ def make_customer(
 
     return customer
 
+def get_or_create_agent_profile(
+    db: Session,
+    agent: User,
+) -> AgentProfile:
+    profile = db.scalar(
+        select(AgentProfile).where(
+            AgentProfile.user_id == agent.id
+        )
+    )
+
+    if profile is not None:
+        return profile
+
+    profile = AgentProfile(
+        user_id=agent.id,
+        phone=None,
+        license_number=f"TEST-LIC-{agent.id}",
+    )
+
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
+
+    return profile
 
 def make_property(
     db: Session,
@@ -318,8 +343,13 @@ def make_property(
     if address is None:
         address = f"{property_count + 1} Gulberg Street"
 
+    agent_profile = get_or_create_agent_profile(
+    db=db,
+    agent=agent,
+)
+
     prop = Property(
-        agent_id=agent.id,
+        agent_id=agent_profile.id,
         title=title,
         city=city,
         address=address,
@@ -403,6 +433,15 @@ def lead_record(
         agent_id=agent_user.id,
     )
 
+@pytest.fixture()
+def agent_profile(
+    db: Session,
+    agent_user: User,
+) -> AgentProfile:
+    return get_or_create_agent_profile(
+        db=db,
+        agent=agent_user,
+    )
 
 # ---------------------------------------------------------------------------
 # Automatic cleanup

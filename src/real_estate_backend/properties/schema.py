@@ -13,6 +13,7 @@ class PropertyBase(BaseModel):
     area_sqft: Optional[float] = None
     description: Optional[str] = None
     is_available: bool = True
+    model_config = ConfigDict(extra="forbid")
     
     @field_validator("city")
     @classmethod

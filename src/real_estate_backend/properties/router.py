@@ -5,7 +5,7 @@ from real_estate_backend.core.rate_limiter import rate_limiter
 from real_estate_backend.core.database import get_db
 from real_estate_backend.properties.schema import PropertyCreate, PropertyUpdate, PropertyResponse, PropertyListResponse
 from real_estate_backend.properties import service
-from real_estate_backend.auth.dependencies import get_current_user, require_admin, require_agent_or_admin
+from real_estate_backend.auth.dependencies import require_agent, require_agent_or_admin
 from real_estate_backend.users.model import User
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
@@ -33,19 +33,55 @@ def get_property(property_id: int, db: Session = Depends(get_db)):
     return service.get_property_by_id(db, property_id)
 
 
-@router.post("/", response_model=PropertyResponse, status_code=201)
-def create_property(data: PropertyCreate, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin),
-    _: None = Depends(rate_limiter),):
-    return service.create_property(db, data,agent_id=current_user.id)
+@router.post(
+    "/",
+    response_model=PropertyResponse,
+    status_code=201,
+)
+def create_property(
+    data: PropertyCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    _: None = Depends(rate_limiter),
+):
+    return service.create_property(
+        db=db,
+        data=data,
+        current_user=current_user,
+    )
 
 
-@router.patch("/{property_id}", response_model=PropertyResponse)
-def update_property(property_id: int, data: PropertyUpdate, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin),
-    _: None = Depends(rate_limiter),):
-    return service.update_property(db, property_id, data)
+@router.patch(
+    "/{property_id}",
+    response_model=PropertyResponse,
+)
+def update_property(
+    property_id: int,
+    data: PropertyUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent_or_admin),
+    _: None = Depends(rate_limiter),
+):
+    return service.update_property(
+        db=db,
+        property_id=property_id,
+        data=data,
+        current_user=current_user,
+    )
 
 
-@router.delete("/{property_id}", status_code=204)
-def delete_property(property_id: int, db: Session = Depends(get_db),current_user: User = Depends(require_agent_or_admin),
-    _: None = Depends(rate_limiter),):
-    service.delete_property(db, property_id)
+@router.delete(
+    "/{property_id}",
+    status_code=204,
+)
+def delete_property(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent_or_admin),
+    _: None = Depends(rate_limiter),
+):
+    service.delete_property(
+        db=db,
+        property_id=property_id,
+        current_user=current_user,
+    )
