@@ -1,6 +1,8 @@
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import datetime
 from typing import Optional
+from real_estate_backend.core.enums import PropertyType
+from real_estate_backend.core.enums import PaymentMethod
 
 
 class PropertyBase(BaseModel):
@@ -13,6 +15,8 @@ class PropertyBase(BaseModel):
     area_sqft: Optional[float] = None
     description: Optional[str] = None
     is_available: bool = True
+    property_type: Optional[PropertyType] = None
+    model_config = ConfigDict(extra="forbid")
     
     @field_validator("city")
     @classmethod
@@ -39,6 +43,7 @@ class PropertyUpdate(BaseModel):
     area_sqft: Optional[float] = Field(default=None, gt=0)
     description: Optional[str] = None
     is_available: Optional[bool] = None
+    property_type: Optional[PropertyType] = None
     
     @field_validator("city")
     @classmethod

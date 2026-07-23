@@ -10,3 +10,10 @@ class LeadStatusChangedEvent:
     old_status: LeadStatus
     new_status: LeadStatus
     agent_id: str | None
+    
+@dataclass
+class LeadCreatedEvent:
+    lead_id: int
+    customer_id: int
+    property_id: int
+    agent_id: int

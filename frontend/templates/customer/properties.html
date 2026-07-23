@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Properties{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Available Properties</h4>
+</div>
+
+<!-- Filters -->
+<form method="GET" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <input
+            type="text"
+            name="city"
+            class="form-control"
+            placeholder="City"
+            value="{{ filters.get('city', '') }}"
+        >
+    </div>
+    <div class="col-md-2">
+        <input
+            type="number"
+            name="min_price"
+            class="form-control"
+            placeholder="Min Price"
+            value="{{ filters.get('min_price', '') }}"
+        >
+    </div>
+    <div class="col-md-2">
+        <input
+            type="number"
+            name="max_price"
+            class="form-control"
+            placeholder="Max Price"
+            value="{{ filters.get('max_price', '') }}"
+        >
+    </div>
+    <div class="col-md-2">
+        <input
+            type="number"
+            name="min_bedrooms"
+            class="form-control"
+            placeholder="Min Bedrooms"
+            value="{{ filters.get('min_bedrooms', '') }}"
+        >
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-dark w-100">
+            <i class="bi bi-search"></i> Search
+        </button>
+    </div>
+    <div class="col-md-1">
+        <a href="{{ url_for('properties') }}" class="btn btn-outline-secondary w-100">
+            <i class="bi bi-x"></i>
+        </a>
+    </div>
+</form>
+
+<!-- Property Cards -->
+{% if properties %}
+    <div class="row g-4">
+        {% for property in properties %}
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-dark">
+                            {{ property.property_type | capitalize if property.property_type else "Property" }}
+                        </span>
+                        <span class="badge bg-success">Available</span>
+                    </div>
+                    <h5 class="fw-bold">{{ property.title }}</h5>
+                    <p class="text-muted small mb-1">
+                        <i class="bi bi-geo-alt"></i> {{ property.city }}
+                    </p>
+                    <p class="text-muted small mb-3">
+                        <i class="bi bi-door-open"></i> {{ property.bedrooms }} Bedrooms
+                    </p>
+                    <h5 class="text-dark fw-bold mb-3">
+                        Rs. {{ "{:,}".format(property.price) }}
+                    </h5>
+                    
+                        <a href="{{ url_for('property_detail', property_id=property.id) }}"
+                        class="btn btn-dark w-100 btn-sm"
+                    >
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-house-slash fs-1 text-muted"></i>
+        <p class="text-muted mt-3">No properties found. Try adjusting your filters.</p>
+    </div>
+{% endif %}
+{% endblock %}

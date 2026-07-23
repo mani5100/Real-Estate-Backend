@@ -2,6 +2,19 @@ import enum
 
 
 class UserRole(str, enum.Enum):
-    ADMIN = "admin"
+    USER = "user"
     AGENT = "agent"
-    CUSTOMER = "customer"
+    ADMIN = "admin"
+    
+class AgentApplicationStatus(str, enum.Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    
+class PropertyType(str, enum.Enum):
+    ROOM = "room"
+    APARTMENT = "apartment"
+
+class PaymentMethod(str, enum.Enum):
+    CASH = "cash"
+    CHEQUE = "cheque"
