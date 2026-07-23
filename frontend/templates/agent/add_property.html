@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Add Property{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ url_for('agent_properties') }}" class="text-decoration-none text-muted me-3">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h4 class="fw-bold mb-0">Add New Property</h4>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST">
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12">
+                            <label class="form-label">Title</label>
+                            <input type="text" name="title" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">City</label>
+                            <input type="text" name="city" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Address</label>
+                            <input type="text" name="address" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Property Type</label>
+                            <select name="property_type" class="form-select">
+                                <option value="">Select type</option>
+                                <option value="room">Room</option>
+                                <option value="apartment">Apartment</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Price (Rs.)</label>
+                            <input type="number" name="price" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Bedrooms</label>
+                            <input type="number" name="bedrooms" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Bathrooms</label>
+                            <input type="number" name="bathrooms" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Area (Sq. Ft.)</label>
+                            <input type="number" name="area_sqft" class="form-control" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100">
+                        <i class="bi bi-plus-lg"></i> Add Property
+                    </button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

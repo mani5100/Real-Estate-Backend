@@ -32,6 +32,12 @@
     </li>
 {% elif session.role == "agent" %}
     <li class="nav-item">
+        <a class="nav-link {% if '/agent/properties' in request.path %}active{% endif %}"
+           href="{{ url_for('agent_properties') }}">
+            <i class="bi bi-buildings"></i> Properties
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link {% if request.path == '/chatbot' %}active{% endif %}"
            href="{{ url_for('chatbot') }}">
             <i class="bi bi-chat-dots"></i> Chatbot

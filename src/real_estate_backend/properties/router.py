@@ -29,6 +29,12 @@ async def list_properties(
 @router.get("/bedrooms/{bedrooms}", response_model=list[PropertyResponse])
 def get_properties_by_bedrooms(bedrooms: int, db: Session = Depends(get_db)):
     return service.get_properties_by_bedrooms(db, bedrooms)
+@router.get("/my", response_model=list[PropertyResponse])
+def get_my_properties(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+):
+    return service.get_my_properties(db=db, current_user=current_user)
 
 @router.get("/{property_id}", response_model=PropertyResponse)
 def get_property(property_id: int, db: Session = Depends(get_db),_: User = Depends(get_current_user)):
@@ -107,3 +113,5 @@ def express_interest(
         current_user=current_user,
         data=data,
     )
+    
+    

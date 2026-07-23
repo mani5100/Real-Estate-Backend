@@ -317,3 +317,20 @@ def create_interest_lead(
     )
 
     return lead
+
+@log_call
+def get_my_properties(
+    db: Session,
+    current_user: User,
+) -> list[Property]:
+    agent_profile = _get_agent_profile(db=db, current_user=current_user)
+
+    properties = list(
+        db.scalars(
+            select(Property)
+            .where(Property.agent_id == agent_profile.id)
+            .order_by(Property.id.asc())
+        ).all()
+    )
+
+    return properties

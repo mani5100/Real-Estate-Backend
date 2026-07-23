@@ -251,14 +251,15 @@ def onboarding_pending():
 @customer_required
 def properties():
     params = {
-        "city": request.args.get("city"),
-        "min_price": request.args.get("min_price"),
-        "max_price": request.args.get("max_price"),
-        "min_bedrooms": request.args.get("min_bedrooms"),
-        "is_available": True,
-    }
-    # Remove None values
-    params = {k: v for k, v in params.items() if v is not None}
+    "city": request.args.get("city"),
+    "min_price": request.args.get("min_price"),
+    "max_price": request.args.get("max_price"),
+    "min_bedrooms": request.args.get("min_bedrooms"),
+    "is_available": True,
+}
+
+# Remove None AND empty strings
+    params = {k: v for k, v in params.items() if v is not None and v != ""} 
 
     data, status = api(
         "GET",
@@ -269,6 +270,8 @@ def properties():
 
     properties_list = data.get("results", []) if status == 200 else []
 
+    print("STATUS:", status)
+    print("DATA:", data)
     return render_template(
         "customer/properties.html",
         properties=properties_list,
@@ -429,7 +432,49 @@ def admin_reject(application_id):
     return redirect(url_for("admin_applications"))
 
 
+@app.route("/agent/properties")
+@agent_required
+def agent_properties():
+    data, status = api(
+        "GET",
+        "/properties/my",
+        token=session["token"],
+    )
 
+    properties_list = data if status == 200 else []
+
+    return render_template("agent/properties.html", properties=properties_list)
+
+
+@app.route("/agent/properties/add", methods=["GET", "POST"])
+@agent_required
+def agent_add_property():
+    if request.method == "POST":
+        data, status = api(
+            "POST",
+            "/properties/",
+            token=session["token"],
+            json={
+                "title": request.form["title"],
+                "city": request.form["city"],
+                "address": request.form["address"],
+                "price": int(request.form["price"]),
+                "bedrooms": int(request.form["bedrooms"]),
+                "bathrooms": int(request.form["bathrooms"]),
+                "area_sqft": float(request.form["area_sqft"]),
+                "description": request.form.get("description"),
+                "property_type": request.form.get("property_type"),
+                "is_available": True,
+            },
+        )
+
+        if status == 201:
+            flash("Property added successfully.", "success")
+            return redirect(url_for("agent_properties"))
+        else:
+            flash(data.get("detail", "Failed to add property."), "danger")
+
+    return render_template("agent/add_property.html")
 
 # ── Run ──────────────────────────────────────────────────────────────────────
 
