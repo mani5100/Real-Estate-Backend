@@ -1,8 +1,8 @@
-"""add user role
+"""initial schema
 
-Revision ID: d45f52a7ee52
+Revision ID: 883786d59a92
 Revises: 
-Create Date: 2026-07-21 17:30:33.039379
+Create Date: 2026-07-22 16:02:22.282202
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd45f52a7ee52'
+revision: str = '883786d59a92'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,21 +34,41 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_table('agent_applications',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('status', sa.Enum('PENDING', 'APPROVED', 'REJECTED', name='agentapplicationstatus'), server_default='PENDING', nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_agent_applications_id'), 'agent_applications', ['id'], unique=False)
+    op.create_index(op.f('ix_agent_applications_user_id'), 'agent_applications', ['user_id'], unique=True)
+    op.create_table('agent_profiles',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('phone', sa.String(length=20), nullable=True),
+    sa.Column('license_number', sa.String(length=50), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_agent_profiles_id'), 'agent_profiles', ['id'], unique=False)
+    op.create_index(op.f('ix_agent_profiles_license_number'), 'agent_profiles', ['license_number'], unique=True)
+    op.create_index(op.f('ix_agent_profiles_user_id'), 'agent_profiles', ['user_id'], unique=True)
     op.create_table('customers',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('full_name', sa.String(length=100), nullable=False),
-    sa.Column('email', sa.String(length=100), nullable=False),
-    sa.Column('phone', sa.String(length=20), nullable=False),
-    sa.Column('is_active', sa.Boolean(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email'),
-    sa.UniqueConstraint('user_id')
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_customers_id'), 'customers', ['id'], unique=False)
+    op.create_index(op.f('ix_customers_user_id'), 'customers', ['user_id'], unique=True)
     op.create_table('properties',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('agent_id', sa.Integer(), nullable=False),
@@ -61,9 +81,11 @@ def upgrade() -> None:
     sa.Column('area_sqft', sa.Float(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('is_available', sa.Boolean(), nullable=False),
+    sa.Column('property_type', sa.Enum('ROOM', 'APARTMENT', name='propertytype'), nullable=True),
+    sa.Column('payment_method', sa.Enum('CASH', 'CHEQUE', name='paymentmethod'), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['agent_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['agent_id'], ['agent_profiles.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_properties_agent_id'), 'properties', ['agent_id'], unique=False)
@@ -75,6 +97,7 @@ def upgrade() -> None:
     sa.Column('property_id', sa.Integer(), nullable=False),
     sa.Column('status', sa.Enum('NEW', 'CONTACTED', 'QUALIFIED', 'CLOSED', 'LOST', name='leadstatus'), nullable=False),
     sa.Column('agent_id', sa.Integer(), nullable=True),
+    sa.Column('budget', sa.Integer(), nullable=True),
     sa.Column('notes', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
@@ -102,8 +125,16 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_properties_city'), table_name='properties')
     op.drop_index(op.f('ix_properties_agent_id'), table_name='properties')
     op.drop_table('properties')
+    op.drop_index(op.f('ix_customers_user_id'), table_name='customers')
     op.drop_index(op.f('ix_customers_id'), table_name='customers')
     op.drop_table('customers')
+    op.drop_index(op.f('ix_agent_profiles_user_id'), table_name='agent_profiles')
+    op.drop_index(op.f('ix_agent_profiles_license_number'), table_name='agent_profiles')
+    op.drop_index(op.f('ix_agent_profiles_id'), table_name='agent_profiles')
+    op.drop_table('agent_profiles')
+    op.drop_index(op.f('ix_agent_applications_user_id'), table_name='agent_applications')
+    op.drop_index(op.f('ix_agent_applications_id'), table_name='agent_applications')
+    op.drop_table('agent_applications')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')

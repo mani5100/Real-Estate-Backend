@@ -2,15 +2,23 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from real_estate_backend.agents.model import AgentProfile
+from real_estate_backend.core.event_bus import event_bus
 from real_estate_backend.core.enums import UserRole
+from real_estate_backend.core.events import LeadCreatedEvent
 from real_estate_backend.core.exceptions import (
     AgentProfileNotFoundError,
+    CustomerProfileNotFoundError,
+    DuplicateLeadError,
     NoPropertiesFoundError,
     PermissionDeniedError,
     PropertyHasLeadsError,
+    PropertyNotAvailableError,
     PropertyNotFoundError,
 )
 from real_estate_backend.core.logging import log_call
+from real_estate_backend.customers.model import Customer
+from real_estate_backend.leads.model import Lead, LeadStatus
+from real_estate_backend.leads.schema import InterestedRequest
 from real_estate_backend.properties.model import Property
 from real_estate_backend.properties.schema import (
     PropertyCreate,
@@ -239,3 +247,73 @@ def get_properties_by_bedrooms(
         raise NoPropertiesFoundError(bedrooms)
 
     return properties
+
+
+@log_call
+def create_interest_lead(
+    db: Session,
+    property_id: int,
+    current_user: User,
+    data: InterestedRequest,
+) -> Lead:
+    # 1. Must have a customer profile
+    customer = db.scalar(
+        select(Customer).where(Customer.user_id == current_user.id)
+    )
+    if not customer:
+        raise CustomerProfileNotFoundError()
+
+    # 2. Property must exist and be available
+    property_record = db.get(Property, property_id)
+    if not property_record:
+        raise PropertyNotFoundError(property_id)
+
+    if not property_record.is_available:
+        raise PropertyNotAvailableError(property_id)
+
+    # 3. No duplicate leads on the same property
+    existing_lead = db.scalar(
+        select(Lead).where(
+            Lead.customer_id == customer.id,
+            Lead.property_id == property_id,
+        )
+    )
+    if existing_lead:
+        raise DuplicateLeadError(customer.id, property_id)
+
+    # 4. Auto-assign agent from the property
+    agent_user_id = property_record.agent.user_id
+
+    # 5. Create the lead
+    lead = Lead(
+        customer_id=customer.id,
+        property_id=property_id,
+        agent_id=agent_user_id,
+        status=LeadStatus.NEW,
+        budget=data.budget,
+        payment_method=data.payment_method,
+        notes=data.notes,
+    )
+
+    db.add(lead)
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    db.refresh(lead)
+
+    # 6. Notify the agent
+    event_bus.emit(
+        "lead.created",
+        LeadCreatedEvent(
+            lead_id=lead.id,
+            customer_id=customer.id,
+            property_id=property_id,
+            agent_id=agent_user_id,
+        )
+    )
+
+    return lead

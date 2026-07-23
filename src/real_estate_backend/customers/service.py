@@ -5,6 +5,7 @@ from real_estate_backend.core.exceptions import CustomerHasLeadsError, CustomerN
 from real_estate_backend.customers.model import Customer
 from real_estate_backend.customers.schema import CustomerCreate, CustomerUpdate, CustomerPaginatedResponse
 from real_estate_backend.core.logging import log_call
+from real_estate_backend.leads.model import Lead
 from real_estate_backend.users.model import User
 from real_estate_backend.core.exceptions import (
     CustomerProfileAlreadyExistsError,
@@ -189,3 +190,30 @@ def update_my_customer_profile(
         .options(joinedload(Customer.user))
         .where(Customer.id == customer.id)
     )
+    
+    
+@log_call
+def get_my_dashboard(
+    db: Session,
+    current_user: User,
+) -> dict:
+    customer = db.scalar(
+        select(Customer)
+        .options(
+            joinedload(Customer.user),
+            joinedload(Customer.leads).joinedload(Lead.property),
+        )
+        .where(Customer.user_id == current_user.id)
+    )
+
+    if customer is None:
+        raise CustomerProfileNotFoundError()
+
+    return {
+        "id": customer.id,
+        "user_id": customer.user_id,
+        "phone": customer.phone,
+        "full_name": customer.user.full_name,
+        "email": customer.user.email,
+        "leads": customer.leads,
+    }

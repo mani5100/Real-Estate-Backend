@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     webhook_secret: str
     rate_limit: int
     window_seconds: int
+    ai_base_url:str
+    
     
     model_config=SettingsConfigDict(
         case_sensitive=False,

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from real_estate_backend.agents import service
 from real_estate_backend.agents.schema import (
+    AgentApplicationCreate,
     AgentApplicationListResponse,
     AgentApplicationResponse,
     AgentApproveRequest,
@@ -60,6 +61,7 @@ def update_my_agent_profile(
     status_code=status.HTTP_201_CREATED,
 )
 def create_my_agent_application(
+    data: AgentApplicationCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     _: None = Depends(rate_limiter),
@@ -67,8 +69,8 @@ def create_my_agent_application(
     return service.create_my_agent_application(
         db=db,
         current_user=current_user,
+        data=data,
     )
-
 
 
 @router.get(
@@ -91,20 +93,6 @@ def get_all_agents(
     )
 
 
-@router.get(
-    "/{agent_id}",
-    response_model=AgentProfileResponse,
-    status_code=status.HTTP_200_OK,
-)
-def get_agent_by_id(
-    agent_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
-):
-    return service.get_agent_by_id(
-        db=db,
-        agent_id=agent_id,
-    )
 
 
 @router.get(
@@ -145,17 +133,29 @@ def get_all_agent_applications(
 )
 def approve_agent_application(
     application_id: int,
-    data: AgentApproveRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
     _: None = Depends(rate_limiter),
 ):
     return service.approve_agent_application(
         db=db,
-        application_id=application_id,
-        data=data,
+        application_id=application_id
     )
 
+@router.get(
+    "/{agent_id}",
+    response_model=AgentProfileResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_agent_by_id(
+    agent_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    return service.get_agent_by_id(
+        db=db,
+        agent_id=agent_id,
+    )
 
 @router.post(
     "/applications/{application_id}/reject",

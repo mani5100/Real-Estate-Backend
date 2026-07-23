@@ -2,6 +2,8 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 import re
 
+from real_estate_backend.core.enums import PropertyType
+
 
 class CustomerBase(BaseModel):
     phone: str | None = None
@@ -59,3 +61,37 @@ class CustomerPaginatedResponse(BaseModel):
     total: int
     next_cursor: int | None
     results: list[CustomerResponse]
+    
+    
+class DashboardPropertyResponse(BaseModel):
+    id: int
+    title: str
+    city: str
+    price: int
+    property_type: PropertyType | None
+    bedrooms: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DashboardLeadResponse(BaseModel):
+    id: int
+    status: str
+    budget: int | None
+    payment_method: str | None
+    notes: str | None
+    created_at: datetime
+    property: DashboardPropertyResponse
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CustomerDashboardResponse(BaseModel):
+    id: int
+    user_id: int
+    phone: str | None
+    full_name: str
+    email: str
+    leads: list[DashboardLeadResponse]
+
+    model_config = ConfigDict(from_attributes=True)

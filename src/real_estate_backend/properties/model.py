@@ -1,5 +1,6 @@
 from __future__ import annotations
-from sqlalchemy import Boolean, DateTime, Float, Integer, String, Text, func,ForeignKey
+from sqlalchemy import Boolean, DateTime, Float, Integer, String, Text, func,ForeignKey, Enum as SAEnum
+from real_estate_backend.core.enums import PropertyType
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -28,10 +29,8 @@ class Property(Base):
     area_sqft:Mapped[float]=mapped_column(Float,nullable=True)
     description:Mapped[str]=mapped_column(Text,nullable=True)
     is_available:Mapped[bool]=mapped_column(Boolean,default=True)
+    property_type: Mapped[PropertyType | None] = mapped_column(SAEnum(PropertyType, name="propertytype"), nullable=True)
     created_at:Mapped[DateTime]=mapped_column(DateTime,server_default=func.now())
     updated_at:Mapped[DateTime]=mapped_column(DateTime,server_default=func.now(),onupdate=func.now())
-    agent: Mapped[AgentProfile] = relationship(
-    "AgentProfile",
-    back_populates="properties",
-)
+    agent: Mapped[AgentProfile] = relationship("AgentProfile", back_populates="properties")
     leads:Mapped[list[Lead]]=relationship("Lead",back_populates="property")

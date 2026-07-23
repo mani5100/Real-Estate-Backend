@@ -10,8 +10,8 @@ from real_estate_backend.core.database import Base
 from real_estate_backend.agents.model import AgentProfile, AgentApplication
 from real_estate_backend.customers.model import Customer
 from real_estate_backend.leads.model import Lead
-from real_estate_backend.properties.model import Property
 from real_estate_backend.users.model import User
+from real_estate_backend.properties.model import Property
 
 
 # this is the Alembic Config object, which provides

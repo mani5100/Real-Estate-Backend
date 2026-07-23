@@ -10,7 +10,7 @@ from real_estate_backend.core.enums import (
     AgentApplicationStatus,
     UserRole,
 )
-from real_estate_backend.agents.schema import AgentApproveRequest, AgentPaginatedResponse, AgentProfileUpdate
+from real_estate_backend.agents.schema import AgentApplicationCreate, AgentApproveRequest, AgentPaginatedResponse, AgentProfileUpdate
 from real_estate_backend.core.exceptions import (
     AgentAlreadyExistsError,
     AgentApplicationAlreadyExistsError,
@@ -28,6 +28,7 @@ from real_estate_backend.users.model import User
 def create_my_agent_application(
     db: Session,
     current_user: User,
+    data: AgentApplicationCreate,
 ) -> AgentApplication:
     if current_user.role == UserRole.AGENT:
         raise AgentAlreadyExistsError()
@@ -53,6 +54,8 @@ def create_my_agent_application(
     application = AgentApplication(
         user_id=current_user.id,
         status=AgentApplicationStatus.PENDING,
+        license_number=data.license_number,
+        phone=data.phone,
     )
 
     db.add(application)
@@ -66,7 +69,6 @@ def create_my_agent_application(
     db.refresh(application)
 
     return application
-
 
 @log_call
 def get_my_agent_application(
@@ -88,19 +90,30 @@ def get_my_agent_application(
 def get_all_agent_applications(
     db: Session,
 ) -> list[AgentApplication]:
-    return list(
-        db.scalars(
-            select(AgentApplication)
-            .order_by(AgentApplication.id.asc())
-        ).all()
-    )
+    applications = db.scalars(
+    select(AgentApplication)
+    .options(joinedload(AgentApplication.user))
+    .where(AgentApplication.status == AgentApplicationStatus.PENDING)
+    .order_by(AgentApplication.created_at.desc())
+).all()
+    return [
+    {
+        "id": app.id,
+        "user_id": app.user_id,
+        "status": app.status.value,
+        "created_at": app.created_at,
+        "updated_at": app.updated_at,
+        "user_full_name": app.user.full_name,
+        "user_email": app.user.email,
+    }
+    for app in applications
+]
 
 
 @log_call
 def approve_agent_application(
     db: Session,
     application_id: int,
-    data: AgentApproveRequest,
 ) -> AgentProfile:
     application = db.scalar(
         select(AgentApplication)
@@ -125,7 +138,7 @@ def approve_agent_application(
 
     existing_license = db.scalar(
         select(AgentProfile).where(
-            AgentProfile.license_number == data.license_number
+            AgentProfile.license_number == application.license_number
         )
     )
 
@@ -134,8 +147,8 @@ def approve_agent_application(
 
     profile = AgentProfile(
         user_id=application.user_id,
-        phone=data.phone,
-        license_number=data.license_number,
+        phone=application.phone,
+        license_number=application.license_number,
     )
 
     application.status = AgentApplicationStatus.APPROVED

@@ -3,6 +3,8 @@ import enum
 from sqlalchemy import DateTime, ForeignKey, Text, Enum as SAEnum, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import TYPE_CHECKING
+
+from real_estate_backend.core.enums import PaymentMethod
 if TYPE_CHECKING:
     from real_estate_backend.customers.model import Customer
     from real_estate_backend.properties.model import Property
@@ -25,6 +27,11 @@ class Lead(Base):
     agent_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=True, index=True
     )
+    budget: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    payment_method: Mapped[PaymentMethod | None] = mapped_column(
+    SAEnum(PaymentMethod, name="paymentmethod"),
+    nullable=True,
+)
     notes:Mapped[str]=mapped_column(String,nullable=True)
     created_at:Mapped[DateTime]=mapped_column(DateTime,server_default=func.now())
     updated_at:Mapped[DateTime]=mapped_column(DateTime,server_default=func.now(),onupdate=func.now())

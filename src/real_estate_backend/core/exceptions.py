@@ -135,3 +135,15 @@ class AgentProfileNotFoundError(NotFoundError):
 class AgentNotFoundError(NotFoundError):
     def __init__(self, agent_id: int) -> None:
         super().__init__(f"agent with id {agent_id} not found")
+
+class DuplicateLeadError(ConflictError):
+    def __init__(self, customer_id: int, property_id: int):
+        super().__init__(
+            f"Customer {customer_id} already has a lead on property {property_id}"
+        )
+
+class PropertyNotAvailableError(ConflictError):
+    def __init__(self, property_id: int):
+        super().__init__(
+            f"Property {property_id} is not available"
+        )

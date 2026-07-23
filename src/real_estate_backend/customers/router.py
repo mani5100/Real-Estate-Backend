@@ -7,7 +7,7 @@ from real_estate_backend.core.exceptions import CustomerHasLeadsError, CustomerN
 from real_estate_backend.core.rate_limiter import rate_limiter
 from real_estate_backend.core.database import get_db
 from real_estate_backend.customers.model import Customer
-from real_estate_backend.customers.schema import CustomerCreate, CustomerUpdate, CustomerResponse,CustomerPaginatedResponse
+from real_estate_backend.customers.schema import CustomerCreate, CustomerDashboardResponse, CustomerUpdate, CustomerResponse,CustomerPaginatedResponse
 from real_estate_backend.customers import service
 from real_estate_backend.auth.dependencies import get_current_user, require_admin, require_agent_or_admin
 from real_estate_backend.users.model import User
@@ -103,5 +103,16 @@ def delete_customer(
 
     return Response(status_code=204)
     
-
-    
+@router.get(
+    "/me/interests",
+    response_model=CustomerDashboardResponse,
+    status_code=200,
+)
+def get_my_dashboard(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return service.get_my_dashboard(
+        db=db,
+        current_user=current_user,
+    )

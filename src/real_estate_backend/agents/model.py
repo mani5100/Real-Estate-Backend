@@ -40,6 +40,7 @@ class AgentProfile(Base):
         unique=True,
         index=True,
     )
+    
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -82,6 +83,12 @@ class AgentApplication(Base):
         index=True,
     )
 
+    license_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    phone: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True,
+    )
+    
     status: Mapped[AgentApplicationStatus] = mapped_column(
         SAEnum(
             AgentApplicationStatus,

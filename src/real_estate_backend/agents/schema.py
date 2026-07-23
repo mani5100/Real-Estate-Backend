@@ -10,14 +10,45 @@ from real_estate_backend.core.enums import AgentApplicationStatus
 class AgentApplicationResponse(BaseModel):
     id: int
     user_id: int
-    status: AgentApplicationStatus
+    status: str
     created_at: datetime
     updated_at: datetime
+    user_full_name: str | None = None
+    user_email: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 class AgentApplicationListResponse(BaseModel):
     results: list[AgentApplicationResponse]
+    
+class AgentApplicationCreate(BaseModel):
+    license_number: str
+    phone: str
+
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("phone cannot be empty")
+        if not re.fullmatch(r"\+?[\d\s\-]{7,20}", value):
+            raise ValueError(
+                "phone must contain only digits, spaces, hyphens, "
+                "or a leading +"
+            )
+        return value
+
+    @field_validator("license_number")
+    @classmethod
+    def validate_license_number(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("license_number cannot be empty")
+        if len(value) > 50:
+            raise ValueError("license_number cannot exceed 50 characters")
+        return value
 
 class AgentApproveRequest(BaseModel):
     phone: str | None = None
