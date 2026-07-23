@@ -1,39 +1,10 @@
-from typing import Literal, Any
-from pydantic import BaseModel
 import json
 
+from real_estate_backend.ai.schema import ConversationMessage, TextResponse, ToolCallResponse
 from real_estate_backend.ai.tools import TOOL_REGISTRY
-
-
-# ── Structured Output Models ─────────────────────────────────────────────────
-# The model MUST respond with one of these two shapes.
-# type = "tool_call" → agentic loop executes the tool and calls model again
-# type = "text"      → final answer, returned to the agent
-
-class ToolCallResponse(BaseModel):
-    type: Literal["tool_call"]
-    tool: str
-    args: dict[str, Any] = {}
-
-
-class TextResponse(BaseModel):
-    type: Literal["text"]
-    message: str
-
 
 # Union type used by the parser
 AgentResponse = ToolCallResponse | TextResponse
-
-
-# ── Conversation Message Schema ──────────────────────────────────────────────
-# Frontend sends history as a list of these.
-# role: "agent" | "assistant" | "tool_result"
-
-class ConversationMessage(BaseModel):
-    role: Literal["agent", "assistant", "tool_result"]
-    content: str
-
-
 # ── System Prompt Builder ────────────────────────────────────────────────────
 
 def _build_tool_descriptions() -> str:
